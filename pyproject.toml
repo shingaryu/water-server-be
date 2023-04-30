@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "line-api-use-case-flask"
+version = "0.1.0"
+description = ""
+authors = ["shingaryu <shingaryu@gmail.com>"]
+readme = "README.md"
+packages = [{include = "line_api_use_case_flask"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flask = "^2.3"
+python-dotenv = "^1.0.0"
+line-bot-sdk = "1.17.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
