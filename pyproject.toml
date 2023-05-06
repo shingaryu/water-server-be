@@ -10,7 +10,7 @@ packages = [{include = "line_api_use_case_flask"}]
 python = "^3.8"
 flask = "^2.3"
 python-dotenv = "^1.0.0"
-line-bot-sdk = "1.17.0"
+line-bot-sdk = "2.4.2"
 
 [build-system]
 requires = ["poetry-core"]
