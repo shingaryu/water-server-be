@@ -11,6 +11,7 @@ python = "^3.8"
 flask = "^2.3"
 python-dotenv = "^1.0.0"
 line-bot-sdk = "2.4.2"
+pymongo = "^4.3.3"
 
 [build-system]
 requires = ["poetry-core"]
