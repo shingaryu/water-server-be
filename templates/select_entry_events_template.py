@@ -1,13 +1,4 @@
-import datetime
-
-def format_date(date):
-    mon = int(date.strftime("%m"))
-    day = int(date.strftime("%d"))
-    a = date.strftime("%a")
-    hour = int(date.strftime("%H"))
-    minutes = date.strftime("%M")
-    text = f'{mon}/{day} ({a}) {hour}:{minutes}'
-    return text
+from common.utils import format_date
 
 def select_event_message_contents(event_flex_contents):
     contents = {
@@ -115,6 +106,3 @@ def event_flex_contents(datetime, place, n_attendees, postback_data):
     ]
 
    return contents
-
-# if __name__ == '__main__':
-#     format_date(datetime.datetime.fromisoformat('2023-05-12T18:00:00+09:00'))

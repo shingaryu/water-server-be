@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 
-from services.postback_service import select_entry_events_message
+from common.consts import ENTRY_START, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
+    ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
+from services.postback_service import select_entry_events_message, select_option_to_entry_message
 
 load_dotenv()
 
@@ -19,6 +21,7 @@ from linebot.exceptions import (
 from common import utils
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
+from urllib.parse import parse_qs, urlparse
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
@@ -67,11 +70,19 @@ def text_message(line_event):
 
 @handler.add(PostbackEvent)
 def postback(line_event):
-    postback_data = line_event.postback.data.split('=')
-    if (postback_data[0] == 'area' and postback_data[1] == '0'):
-        logger.debug('area 0 clicked')
+    parsed_url = urlparse(line_event.postback.data)
+    query_params = parse_qs(parsed_url.query)
+    event_name = parsed_url.path.strip("/")
+    if (event_name == ENTRY_START):
         message = select_entry_events_message()
         line_bot_api.reply_message(line_event.reply_token, message)
+    elif (event_name == SELECT_EVENT_TO_ENTRY):
+        event_id = query_params.get(SELECT_EVENT_TO_ENTRY_EVENT)
+        message = select_option_to_entry_message(event_id)
+        line_bot_api.reply_message(line_event.reply_token, message)
+    elif (event_name == ENTRY_WITH_OPTION):
+        event_id = query_params.get(ENTRY_WITH_OPTION_EVENT)
+        option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)
 
 if __name__ == '__main__':
     print('line-api-use-case-flask:main')

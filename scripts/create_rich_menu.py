@@ -1,4 +1,7 @@
 from dotenv import load_dotenv
+
+from common.consts import ENTRY_START
+
 load_dotenv()
 
 from linebot.models import (
@@ -10,6 +13,23 @@ from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 
 RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
+POSTBACK_DATA = [
+    f'{ENTRY_START}',
+    f'richmenu/?area=1',
+    f'richmenu/?area=2',
+    f'richmenu/?area=3',
+    f'richmenu/?area=4',
+    f'richmenu/?area=5',
+]
+
+DISPLAY_TEXTS = [
+    '参加投票',
+    '開催予定の登録',
+    'リッチメニュー2',
+    'リッチメニュー3',
+    'リッチメニュー4',
+    'リッチメニュー5',
+]
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
@@ -29,7 +49,7 @@ rich_menu_to_create = RichMenu(
     chat_bar_text=f'{now.strftime("%Y-%m-%d")}',
     areas=[RichMenuArea(
         bounds=RichMenuBounds(x=(i % 3) * 833, y=(i // 3) * 843, width=833, height=843),
-        action=PostbackAction(data=f'area={i}', display_text=f'ボタン{i}')) for i in range(6)]
+        action=PostbackAction(data=POSTBACK_DATA[i], display_text=DISPLAY_TEXTS[i])) for i in range(6)]
 )
 rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
 logger.info(f'Rich menu created: {rich_menu_id}')

@@ -58,3 +58,12 @@ def create_success_response(body):
         フロントに返却するデータ
     """
     return create_response(200, body)
+
+def format_date(date):
+    mon = int(date.strftime("%m"))
+    day = int(date.strftime("%d"))
+    a = date.strftime("%a")
+    hour = int(date.strftime("%H"))
+    minutes = date.strftime("%M")
+    text = f'{mon}/{day} ({a}) {hour}:{minutes}'
+    return text
