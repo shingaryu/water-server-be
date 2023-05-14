@@ -1,9 +1,12 @@
 import os
-from linebot.models import FlexSendMessage
+
+from bson import ObjectId
+from linebot.models import FlexSendMessage, TextSendMessage
 
 from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
 from common.get_logger import get_logger
-from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event
+from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
+    insert_entry, delete_entry
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
 from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
 import json
@@ -52,5 +55,28 @@ def select_option_to_entry_message(event_id):
 
     return flex_message
 
-def entry_with_option():
-    pass
+def entry_with_option(event_id, option_id, user):
+    document_data = {
+        "eventId": event_id,
+        "user": {
+            "userId": user.user_id,
+            "displayName": user.display_name,
+            "pictureUrl": user.picture_url,
+            "statusMessage": user.status_message
+        },
+        "selectedOptionId": option_id
+    }
+
+    user_entry = find_entry(user.user_id)
+    message = None
+    if user_entry:
+        # delete existing
+        delete_entry(user_entry["_id"])
+        result = insert_entry(document_data)
+
+        message = TextSendMessage(text=f'再投票しました。')
+    else:
+        result = insert_entry(document_data)
+        message = TextSendMessage(text=f'投票しました。')
+
+    return message

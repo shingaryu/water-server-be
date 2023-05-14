@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from common.consts import ENTRY_START, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
-from services.postback_service import select_entry_events_message, select_option_to_entry_message
+from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option
 
 load_dotenv()
 
@@ -88,6 +88,9 @@ def postback(line_event):
         elif (event_name == ENTRY_WITH_OPTION):
             event_id = query_params.get(ENTRY_WITH_OPTION_EVENT)[0]
             option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)[0]
+            profile = line_bot_api.get_profile(line_event.source.user_id)
+            message = entry_with_option(event_id, option_id, profile)
+            line_bot_api.reply_message(line_event.reply_token, message)
     except Exception as e:
         line_bot_api.reply_message(
             line_event.reply_token,

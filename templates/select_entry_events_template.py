@@ -73,26 +73,26 @@ def event_flex_contents(datetime, place, n_attendees, postback_data):
                         }
                     ]
                 },
-                {
-                    "type": "box",
-                    "layout": "baseline",
-                    "contents": [
-                        {
-                            "type": "text",
-                            "text": "人数",
-                            "flex": 1,
-                            "size": "sm",
-                            "color": "#aaaaaa"
-                        },
-                        {
-                            "type": "text",
-                            "text": f'{n_attendees}人',
-                            "flex": 5,
-                            "size": "sm"
-                        }
-                    ],
-                    "spacing": "sm"
-                }
+                # {
+                #     "type": "box",
+                #     "layout": "baseline",
+                #     "contents": [
+                #         {
+                #             "type": "text",
+                #             "text": "人数",
+                #             "flex": 1,
+                #             "size": "sm",
+                #             "color": "#aaaaaa"
+                #         },
+                #         {
+                #             "type": "text",
+                #             "text": f'{n_attendees}人',
+                #             "flex": 5,
+                #             "size": "sm"
+                #         }
+                #     ],
+                #     "spacing": "sm"
+                # }
             ]
         },
         {

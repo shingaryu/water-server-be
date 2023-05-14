@@ -52,6 +52,28 @@ def find_all_entries():
     results = list(entries_collection.find())
 
     return results
+
+def find_entry(user_id):
+    logger.info(f'Find entry with user id: {user_id}...')
+    entry = entries_collection.find_one({"user.userId": user_id})
+    logger.debug(entry)
+
+    return entry
+
+def insert_entry(document):
+    logger.info(f'Insert entry...')
+    result = entries_collection.insert_one(document)
+    logger.debug(f'New document id: {result.inserted_id}')
+    return result
+
+def delete_entry(id):
+    logger.info(f'Delete entry: {str(id)}...')
+    filter = {"_id": id}
+    result = entries_collection.delete_one(filter)
+
+    logger.debug(f'{result.deleted_count} document(s) deleted')
+    return result
+
 # if __name__ == '__main__':
 #     print('mongo_repository:main')
 #     find_recent_events(2)
