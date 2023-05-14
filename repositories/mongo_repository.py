@@ -16,6 +16,7 @@ db = client["waterServerDbDev"]
 # logger.info('Successfully connected to database')
 
 events_collection = db["Events"]
+entries_collection = db["Entries"]
 
 def find_recent_events(n_items):
     logger.info(f'Get first {n_items} events...')
@@ -31,6 +32,26 @@ def find_recent_events(n_items):
 
     return results
 
+def find_all_events():
+    logger.info('Find all events...')
+    results = list(events_collection.find())
+
+    return results
+
+def find_event(event_id):
+    logger.info(f'Find event with id: {event_id}...')
+    event = events_collection.find_one({"_id": event_id})
+
+    if event:
+        logger.debug(event)
+
+    return event
+
+def find_all_entries():
+    logger.info('Find all entries...')
+    results = list(entries_collection.find())
+
+    return results
 # if __name__ == '__main__':
 #     print('mongo_repository:main')
 #     find_recent_events(2)

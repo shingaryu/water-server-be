@@ -1,3 +1,4 @@
+from bson import ObjectId
 from dotenv import load_dotenv
 
 from common.consts import ENTRY_START, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
@@ -81,12 +82,12 @@ def postback(line_event):
             message = select_entry_events_message()
             line_bot_api.reply_message(line_event.reply_token, message)
         elif (event_name == SELECT_EVENT_TO_ENTRY):
-            event_id = query_params.get(SELECT_EVENT_TO_ENTRY_EVENT)
-            message = select_option_to_entry_message(event_id)
+            event_id = query_params.get(SELECT_EVENT_TO_ENTRY_EVENT)[0]
+            message = select_option_to_entry_message(ObjectId(event_id))
             line_bot_api.reply_message(line_event.reply_token, message)
         elif (event_name == ENTRY_WITH_OPTION):
-            event_id = query_params.get(ENTRY_WITH_OPTION_EVENT)
-            option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)
+            event_id = query_params.get(ENTRY_WITH_OPTION_EVENT)[0]
+            option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)[0]
     except Exception as e:
         line_bot_api.reply_message(
             line_event.reply_token,
