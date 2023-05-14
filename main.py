@@ -54,6 +54,9 @@ def request_handler():
     except InvalidSignatureError as e:
         logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
         return error_json
+    # except Exception as e:
+    #     logger.error(f'Got internal exception: {e.message}')
+
     else:
         ok_json = utils.create_success_response(
             json.dumps('Success'))
@@ -70,19 +73,25 @@ def text_message(line_event):
 
 @handler.add(PostbackEvent)
 def postback(line_event):
-    parsed_url = urlparse(line_event.postback.data)
-    query_params = parse_qs(parsed_url.query)
-    event_name = parsed_url.path.strip("/")
-    if (event_name == ENTRY_START):
-        message = select_entry_events_message()
-        line_bot_api.reply_message(line_event.reply_token, message)
-    elif (event_name == SELECT_EVENT_TO_ENTRY):
-        event_id = query_params.get(SELECT_EVENT_TO_ENTRY_EVENT)
-        message = select_option_to_entry_message(event_id)
-        line_bot_api.reply_message(line_event.reply_token, message)
-    elif (event_name == ENTRY_WITH_OPTION):
-        event_id = query_params.get(ENTRY_WITH_OPTION_EVENT)
-        option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)
+    try:
+        parsed_url = urlparse(line_event.postback.data)
+        query_params = parse_qs(parsed_url.query)
+        event_name = parsed_url.path.strip("/")
+        if (event_name == ENTRY_START):
+            message = select_entry_events_message()
+            line_bot_api.reply_message(line_event.reply_token, message)
+        elif (event_name == SELECT_EVENT_TO_ENTRY):
+            event_id = query_params.get(SELECT_EVENT_TO_ENTRY_EVENT)
+            message = select_option_to_entry_message(event_id)
+            line_bot_api.reply_message(line_event.reply_token, message)
+        elif (event_name == ENTRY_WITH_OPTION):
+            event_id = query_params.get(ENTRY_WITH_OPTION_EVENT)
+            option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)
+    except Exception as e:
+        line_bot_api.reply_message(
+            line_event.reply_token,
+            TextSendMessage(text=f'サーバー内部でエラーが発生しました。\n{str(e)}'))
+        raise e
 
 if __name__ == '__main__':
     print('line-api-use-case-flask:main')
