@@ -53,9 +53,9 @@ def find_all_entries():
 
     return results
 
-def find_entry(user_id):
-    logger.info(f'Find entry with user id: {user_id}...')
-    entry = entries_collection.find_one({"user.userId": user_id})
+def find_entry(event_id, user_id):
+    logger.info(f'Find entry with event_id: {event_id}, user id: {user_id}...')
+    entry = entries_collection.find_one({"eventId": event_id, "user.userId": user_id})
     logger.debug(entry)
 
     return entry

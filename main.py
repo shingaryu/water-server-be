@@ -91,6 +91,10 @@ def postback(line_event):
             profile = line_bot_api.get_profile(line_event.source.user_id)
             message = entry_with_option(event_id, option_id, profile)
             line_bot_api.reply_message(line_event.reply_token, message)
+        else:
+            line_bot_api.reply_message(
+                line_event.reply_token,
+                TextSendMessage(text='まだ実装してないよ。ごめんね！！'))
     except Exception as e:
         line_bot_api.reply_message(
             line_event.reply_token,

@@ -1,6 +1,5 @@
 import os
 
-from bson import ObjectId
 from linebot.models import FlexSendMessage, TextSendMessage
 
 from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
@@ -9,7 +8,6 @@ from repositories.mongo_repository import find_recent_events, find_all_events, f
     insert_entry, delete_entry
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
 from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
-import json
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
@@ -67,7 +65,7 @@ def entry_with_option(event_id, option_id, user):
         "selectedOptionId": option_id
     }
 
-    user_entry = find_entry(user.user_id)
+    user_entry = find_entry(event_id, user.user_id)
     message = None
     if user_entry:
         # delete existing
