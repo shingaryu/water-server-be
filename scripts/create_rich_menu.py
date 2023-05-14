@@ -29,7 +29,7 @@ rich_menu_to_create = RichMenu(
     chat_bar_text=f'{now.strftime("%Y-%m-%d")}',
     areas=[RichMenuArea(
         bounds=RichMenuBounds(x=(i % 3) * 833, y=(i // 3) * 843, width=833, height=843),
-        action=PostbackAction(data=f'area={i}')) for i in range(6)]
+        action=PostbackAction(data=f'area={i}', display_text=f'ボタン{i}')) for i in range(6)]
 )
 rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
 logger.info(f'Rich menu created: {rich_menu_id}')

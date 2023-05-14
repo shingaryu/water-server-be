@@ -2,14 +2,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-import sys
 import json
-import logging
+import datetime
 
 from flask import Flask, request
-from linebot import (
-    LineBotApi, WebhookHandler
-)
+from linebot import WebhookHandler
 from linebot.models import (
     MessageEvent, PostbackEvent, FollowEvent, TextMessage, ImageMessage,
     TextSendMessage, FlexSendMessage, QuickReply, TemplateSendMessage,
@@ -19,33 +16,16 @@ from linebot.exceptions import (
     LineBotApiError, InvalidSignatureError
 )
 from common import (common_const, utils)
+from common.get_logger import get_logger
+from common.line_bot_client import get_line_bot_client
+from common.message_templetes import select_event_message_contents, event_flex_contents
+
+logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 app = Flask(__name__)
 
-# ログ出力設定
-FORMAT = '%(asctime)s [%(name)s][%(levelname)s] - %(message)s'
-logging.basicConfig(format=FORMAT)
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler(sys.stdout)
-logger.addHandler(handler)
-LOGGER_LEVEL = os.environ.get("LOGGER_LEVEL")
-if LOGGER_LEVEL == 'DEBUG':
-    logger.setLevel(logging.DEBUG)
-else:
-    logger.setLevel(logging.INFO)
-
-channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
-channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
-if channel_secret is None:
-    logger.error('Specify LINE_CHANNEL_SECRET as environment variable.')
-    sys.exit(1)
-if channel_access_token is None:
-    logger.error('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
-    sys.exit(1)
-
-line_bot_api = LineBotApi(channel_access_token)
-handler = WebhookHandler(channel_secret)
-
+line_bot_api = get_line_bot_client()
+handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
 def get_sigunature(key_search_dict):
     """
@@ -173,6 +153,23 @@ def image_message(line_event):
         TextSendMessage(text='画像を受け付けました(画像は保存されません)'))
 
 
+mock_events = [
+    {
+        "_id": {
+            "ObjectId": "6456313426165d3c40069c2f"
+        },
+        "date": "2023-05-12T18:00:00+09:00",
+        "place": "志村第五小学校"
+    },
+    {
+        "_id": {
+            "ObjectId": "6456318526165d3c40069c30"
+        },
+        "date": "2023-05-14T09:00:00+09:00",
+        "place": "桜台体育館"
+    }
+]
+
 @handler.add(PostbackEvent)
 def postback(line_event):
     """
@@ -184,71 +181,25 @@ def postback(line_event):
         LINEメッセージイベント内容。
 
     """
-    param_list = line_event.postback.data.split('&')
-    action = None
-    action_type = None
-    for param in param_list:
-        if param.split('=')[0] == 'action':
-            action = param.split('=')[1]
-        elif param.split('=')[0] == 'lang':
-            language = param.split('=')[1]
-        else:
-            action_type = param.split('=')[1]
 
-    if action == 'send_message':
-        if action_type == 'flex':
-            flex_obj = FlexSendMessage.new_from_json_dict(
-                common_const.const.FLEX)
-            line_bot_api.reply_message(
-                line_event.reply_token, flex_obj)
-        elif action_type == 'carousel':
-            carousel_template_message = common_const.const.CAROUSEL
-            line_bot_api.reply_message(
-                line_event.reply_token, carousel_template_message)
-        elif action_type == 'message':
-            line_bot_api.reply_message(
-                line_event.reply_token, TextSendMessage(text='通常メッセージの送信デモ'))
-        else:
-            line_bot_api.reply_message(
-                line_event.reply_token, TextSendMessage(
-                    text='Demonstration of sending Normal Message'))
-    elif action == 'change_menu':
-        logger.debug('change_menu: ' + action_type)
-        line_bot_api.link_rich_menu_to_user(
-            line_event.source.user_id,
-            common_const.const.MENU_LIST[action_type])
-    elif action == 'reserve':
-        logger.debug(line_event.postback.params)
-        message = str(line_event.postback.params['datetime']) + 'に予約しました！'
-        line_bot_api.reply_message(line_event.reply_token,
-                                   TextSendMessage(text=message))
-    elif action == 'quick_reply':
-        items = common_const.const.QUICK_REPLY_ITEMS
-        messages = [
-            TextSendMessage(text='クイックリプライメニュー',
-                            quick_reply=QuickReply(items=items)),
-            TextSendMessage(text='「位置情報」を送信する機能を希望しない場合は、端末の「位置情報共有」をオフにしてください。',  # noqa 501
-                            quick_reply=QuickReply(items=items))]
-        line_bot_api.reply_message(
-            line_event.reply_token,
-            messages=messages)
+    postback_data = line_event.postback.data
+    if (postback_data.split('=')[0] == 'area'):
+        if (postback_data.split('=')[1] == '0'):
+            logger.debug('area 0 clicked')
 
+            event_contents = []
+            for event in mock_events:
+                date = event["date"]
+                this_event_contents = event_flex_contents(datetime.datetime.fromisoformat(event["date"]), event["place"], 3, f'select_event={event["_id"]["ObjectId"]}')
+                event_contents += this_event_contents
 
-@handler.add(FollowEvent)
-def follow(line_event):
-    """
-    Webhookに送信されたLINEフォローイベントについて処理を実施する
+            contents = select_event_message_contents(event_contents)
+            flex_message = FlexSendMessage(
+                alt_text='開催一覧',
+                contents=contents
+            )
 
-    Parameters
-    ----------
-    line_event: dict
-        LINEメッセージイベント内容。
-
-    """
-    # デフォルトのリッチメニューを表示する
-    line_bot_api.link_rich_menu_to_user(
-        line_event.source.user_id,
-        common_const.const.MENU_LIST['message'])
+            line_bot_api.reply_message(line_event.reply_token, flex_message)
 
 if __name__ == '__main__':
     print('line-api-use-case-flask:main')
