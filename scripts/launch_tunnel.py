@@ -13,13 +13,13 @@ line_bot_api = get_line_bot_client()
 
 # ngrokはPATHに設定しておくこと
 # ngrokを実行するコマンド
-cmd = "start ngrok http 5000" # todo: linux 対応
+#cmd = "start ngrok http 5000" # todo: linux 対応
 
-logger.info(f'Execute {cmd}...')
-ngrok_process = subprocess.Popen(cmd.split(), shell=True)
+#logger.info(f'Execute {cmd}...')
+#ngrok_process = subprocess.Popen(cmd.split(), shell=True)
 
 # ngrokが起動するまで待機する
-time.sleep(2)
+#time.sleep(2)
 
 # ngrokのAPIにアクセスしてpublic_urlを取得する
 response = requests.get("http://localhost:4040/api/tunnels")

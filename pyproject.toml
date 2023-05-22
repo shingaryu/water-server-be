@@ -1,16 +1,18 @@
 [tool.poetry]
-name = "line-api-use-case-flask"
+name = "water-server-be"
 version = "0.1.0"
 description = ""
 authors = ["shingaryu <shingaryu@gmail.com>"]
 readme = "README.md"
-packages = [{include = "line_api_use_case_flask"}]
+#packages = [{include = "water_server_be"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-flask = "^2.3"
-python-dotenv = "^1.0.0"
-line-bot-sdk = "2.4.2"
+python = "^3.7"
+Flask = "~2.2"
+python-dotenv = "0.21.1"
+
+[tool.poetry.group.dev.dependencies]
+line-bot-sdk = "^2.4.2"
 pymongo = "^4.3.3"
 
 [build-system]
