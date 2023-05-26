@@ -10,7 +10,7 @@ from common.get_logger import get_logger
 load_dotenv()
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
-client = MongoClient('localhost', 27017)
+client = MongoClient(os.environ.get("CONNECTION_STRING"), tlsAllowInvalidCertificates=True)
 
 db = client["waterServerDbDev"]
 # logger.info('Successfully connected to database')
