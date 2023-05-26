@@ -11,6 +11,12 @@ from templates.select_option_to_entry_template import select_option_to_entry_fle
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
+def show_recent_event_message():
+    events = find_recent_events(1)
+    if len(events) == 0:
+        return TextSendMessage(text='直近の開催予定がありません。')
+    else:
+        return select_option_to_entry_message(events[0]["_id"])
 
 def select_entry_events_message():
     event_contents = []

@@ -3,10 +3,42 @@ from common.utils import format_date
 
 
 def select_option_to_entry_flex_contents(event, entry_option_status):
-  count = 0
+  total_count = 0
   for (option, attendees) in entry_option_status:
-    count += len(attendees)
+    total_count += len(attendees)
 
+  body_contents = [
+    {
+      "type": "text",
+      "text": "投票する",
+      "weight": "bold",
+      "size": "xl"
+    },
+    {
+      "type": "box",
+      "layout": "vertical",
+      "margin": "lg",
+      "spacing": "sm",
+      "contents": event_detail_lines(event, total_count)
+    }
+  ]
+
+  for (option, attendees) in entry_option_status:
+    body_contents.append(option_box(option["text"], attendees))
+    body_contents.append(option_button(str(event["_id"]), str(option["id"])))
+
+  contents = {
+    "type": "bubble",
+    "body": {
+      "type": "box",
+      "layout": "vertical",
+      "contents": body_contents
+    }
+  }
+
+  return contents
+
+def event_detail_lines(event, count):
   event_detail = [
     {
       "type": "box",
@@ -66,36 +98,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
     }
   ]
 
-  inner_contents = [
-    {
-      "type": "text",
-      "text": "投票する",
-      "weight": "bold",
-      "size": "xl"
-    },
-    {
-      "type": "box",
-      "layout": "vertical",
-      "margin": "lg",
-      "spacing": "sm",
-      "contents": event_detail
-    }
-  ]
-
-  for (option, attendees) in entry_option_status:
-    inner_contents.append(option_box(option["text"], attendees))
-    inner_contents.append(option_button(str(event["_id"]), str(option["id"])))
-
-  contents = {
-    "type": "bubble",
-    "body": {
-      "type": "box",
-      "layout": "vertical",
-      "contents": inner_contents
-    }
-  }
-
-  return contents
+  return event_detail
 
 def option_box(text, attendees):
   box = {

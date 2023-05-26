@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from common.consts import ENTRY_START
+from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT
 
 load_dotenv()
 
@@ -15,8 +15,8 @@ from common.line_bot_client import get_line_bot_client
 # 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ず同ディレクトリで実行すること
 RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
 POSTBACK_DATA = [
-    f'{ENTRY_START}',
-    f'richmenu/?area=1',
+    f'{SHOW_NEXT_EVENT}',
+    f'{SHOW_EVENTS}',
     f'richmenu/?area=2',
     f'richmenu/?area=3',
     f'richmenu/?area=4',
@@ -24,8 +24,8 @@ POSTBACK_DATA = [
 ]
 
 DISPLAY_TEXTS = [
-    '参加投票',
-    '開催予定の登録',
+    '次の開催日',
+    '開催日の一覧',
     'リッチメニュー2',
     'リッチメニュー3',
     'リッチメニュー4',
