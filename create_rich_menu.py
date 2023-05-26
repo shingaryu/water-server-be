@@ -12,6 +12,7 @@ import datetime
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 
+# 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ず同ディレクトリで実行すること
 RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
 POSTBACK_DATA = [
     f'{ENTRY_START}',
