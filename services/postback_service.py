@@ -2,7 +2,8 @@ import os
 
 from linebot.models import FlexSendMessage, TextSendMessage
 
-from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
+from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, ENTRY_WITH_OPTION, \
+    ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
 from common.get_logger import get_logger
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
     insert_entry, delete_entry
@@ -39,18 +40,20 @@ def select_option_to_entry_message(event_id):
     event = find_event(event_id)
     entries = find_all_entries()
 
-    dict = {}
+    entry_option_dict = {}
     for option in event["entryOptions"]:
-        dict[str(option["id"])] = (option, [])
+        option_id = str(option["id"])
+        postback_data = f'{ENTRY_WITH_OPTION}/?{ENTRY_WITH_OPTION_EVENT}={event_id}&{ENTRY_WITH_OPTION_OPTION}={option_id}'
+        entry_option_dict[option_id] = (option, postback_data, [])
 
     for entry in entries:
         if entry["eventId"] != str(event_id):
             continue
 
-        (opt, attendees_list) = dict[entry["selectedOptionId"]]
+        (_, _, attendees_list) = entry_option_dict[entry["selectedOptionId"]]
         attendees_list.append(entry["user"])
 
-    contents = select_option_to_entry_flex_contents(event, list(dict.values()))
+    contents = select_option_to_entry_flex_contents(event, list(entry_option_dict.values()))
 
     flex_message = FlexSendMessage(
         alt_text='投票する',

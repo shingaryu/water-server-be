@@ -1,10 +1,8 @@
-from common.consts import ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
 from common.utils import format_date
-
 
 def select_option_to_entry_flex_contents(event, entry_option_status):
   total_count = 0
-  for (option, attendees) in entry_option_status:
+  for (_, _, attendees) in entry_option_status:
     total_count += len(attendees)
 
   body_contents = [
@@ -23,9 +21,9 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
     }
   ]
 
-  for (option, attendees) in entry_option_status:
-    body_contents.append(option_box(option["text"], attendees))
-    body_contents.append(option_button(str(event["_id"]), str(option["id"])))
+  for (option, postback_data, attendees) in entry_option_status:
+    body_contents.append(option_box(option, attendees))
+    body_contents.append(option_button(postback_data))
 
   contents = {
     "type": "bubble",
@@ -100,7 +98,7 @@ def event_detail_lines(event, count):
 
   return event_detail
 
-def option_box(text, attendees):
+def option_box(option, attendees):
   box = {
     "type": "box",
     "layout": "vertical",
@@ -111,7 +109,7 @@ def option_box(text, attendees):
         "contents": [
           {
             "type": "text",
-            "text": text
+            "text": option["text"]
           },
           {
             "type": "text",
@@ -154,13 +152,13 @@ def attendees_box(attendees):
 
   return box
 
-def option_button(event_id, option_id):
+def option_button(postback_data):
   button = {
     "type": "button",
     "action": {
       "type": "postback",
       "label": "投票",
-      "data": f'{ENTRY_WITH_OPTION}/?{ENTRY_WITH_OPTION_EVENT}={event_id}&{ENTRY_WITH_OPTION_OPTION}={option_id}'
+      "data": postback_data
     }
   }
 
