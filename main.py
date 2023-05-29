@@ -1,9 +1,10 @@
 from bson import ObjectId
 from dotenv import load_dotenv
 
-from common.consts import ENTRY_START, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
-    ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
-from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option
+from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
+    ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON
+from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
+    show_recent_event_message
 
 load_dotenv()
 
@@ -78,7 +79,10 @@ def postback(line_event):
         parsed_url = urlparse(line_event.postback.data)
         query_params = parse_qs(parsed_url.query)
         event_name = parsed_url.path.strip("/")
-        if (event_name == ENTRY_START):
+        if (event_name == SHOW_NEXT_EVENT):
+            message = show_recent_event_message()
+            line_bot_api.reply_message(line_event.reply_token, message)
+        elif (event_name == SHOW_EVENTS):
             message = select_entry_events_message()
             line_bot_api.reply_message(line_event.reply_token, message)
         elif (event_name == SELECT_EVENT_TO_ENTRY):
@@ -90,6 +94,9 @@ def postback(line_event):
             option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)[0]
             profile = line_bot_api.get_profile(line_event.source.user_id)
             message = entry_with_option(event_id, option_id, profile)
+            line_bot_api.reply_message(line_event.reply_token, message)
+        elif (event_name == AKIO_BUTTON):
+            message = TextSendMessage(text='こんにちは、林亮夫です。')
             line_bot_api.reply_message(line_event.reply_token, message)
         else:
             line_bot_api.reply_message(

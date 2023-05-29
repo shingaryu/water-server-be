@@ -1,6 +1,6 @@
 from common.utils import format_date
 
-def select_event_message_contents(event_flex_contents):
+def select_event_message_contents(n_recent_events, event_flex_contents):
     contents = {
         "type": "bubble",
         "body": {
@@ -9,7 +9,7 @@ def select_event_message_contents(event_flex_contents):
             "contents": [
                 {
                     "type": "text",
-                    "text": "開催予定",
+                    "text": f"開催予定(直近{n_recent_events}件)",
                     "weight": "bold",
                     "size": "xl"
                 }] + (event_flex_contents)

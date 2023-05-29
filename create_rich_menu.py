@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from common.consts import ENTRY_START
+from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, AKIO_BUTTON
 
 load_dotenv()
 
@@ -12,20 +12,21 @@ import datetime
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 
+# 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ず同ディレクトリで実行すること
 RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
 POSTBACK_DATA = [
-    f'{ENTRY_START}',
-    f'richmenu/?area=1',
-    f'richmenu/?area=2',
+    f'{SHOW_NEXT_EVENT}',
+    f'{SHOW_EVENTS}',
+    f'{AKIO_BUTTON}',
     f'richmenu/?area=3',
     f'richmenu/?area=4',
     f'richmenu/?area=5',
 ]
 
 DISPLAY_TEXTS = [
-    '参加投票',
-    '開催予定の登録',
-    'リッチメニュー2',
+    '次の開催日',
+    '開催日の一覧',
+    'はやしあきお',
     'リッチメニュー3',
     'リッチメニュー4',
     'リッチメニュー5',

@@ -1,9 +1,11 @@
-ENTRY_START= "entry_start"
+SHOW_NEXT_EVENT = "show_next"
+SHOW_EVENTS = "show_events"
 SELECT_EVENT_TO_ENTRY = "select_event"
 SELECT_EVENT_TO_ENTRY_EVENT = "event"
 ENTRY_WITH_OPTION = "entry"
 ENTRY_WITH_OPTION_EVENT = "event"
 ENTRY_WITH_OPTION_OPTION = "option"
+AKIO_BUTTON = "akio"
 #
 # POSTBACK_EVENTS = {
 #     "ENTRY_START": {
