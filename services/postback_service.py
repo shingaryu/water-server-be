@@ -11,6 +11,8 @@ from templates.select_option_to_entry_template import select_option_to_entry_fle
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
+N_RECENT_EVENTS = 5
+
 def show_recent_event_message():
     events = find_recent_events(1)
     if len(events) == 0:
@@ -20,14 +22,14 @@ def show_recent_event_message():
 
 def select_entry_events_message():
     event_contents = []
-    recent_events = find_recent_events(3)
+    recent_events = find_recent_events(N_RECENT_EVENTS)
     for event in recent_events:
         postback_data = f'{SELECT_EVENT_TO_ENTRY}/?{SELECT_EVENT_TO_ENTRY_EVENT}={str(event["_id"])}'
         this_event_contents = event_flex_contents(event["startTime"], event["place"], 0,
                                                   postback_data)
         event_contents += this_event_contents
 
-    contents = select_event_message_contents(event_contents)
+    contents = select_event_message_contents(N_RECENT_EVENTS, event_contents)
     flex_message = FlexSendMessage(
         alt_text='開催一覧',
         contents=contents
