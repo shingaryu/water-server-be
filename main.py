@@ -14,22 +14,43 @@ from flask import Flask, request
 from linebot import WebhookHandler
 from linebot.models import (
     MessageEvent, PostbackEvent, TextMessage,
-    TextSendMessage
-)
-from linebot.exceptions import (
-    LineBotApiError, InvalidSignatureError
-)
+    TextSendMessage)
+from linebot.exceptions import (LineBotApiError, InvalidSignatureError
+                                )
 from common import utils
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 from urllib.parse import parse_qs, urlparse
+# 変更1
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 app = Flask(__name__)
 
+# 変更2
+scheduler = BackgroundScheduler(daemon=True)
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
+
+# 変更3: 10分ごとに実行するプログラムの中身
+def my_job():
+    # line_bot_api.reply_message(
+    #     line_event.reply_token,
+    #     TextSendMessage(text='こんにちわ'))
+    # message = select_entry_events_message()
+    # line_bot_api.reply_message(line_event.reply_token, message)
+    # current_time = datetime.datetime.now()
+    # print(current_time)
+    print("10分ごとに実行されるプログラム")
+
+
+# 変更4: 10分ごとにmy_jobを実行するよう指示
+@app.before_first_request
+def start_scheduler():
+    scheduler.add_job(my_job, 'interval', minutes=1)
+    scheduler.start()
 
 @app.route("/")
 def hello_world():
@@ -50,13 +71,13 @@ def request_handler():
     except LineBotApiError as e:
         logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
         for m in e.error.details:
-            logger.error('  %s: %s' % (m.property, m.message))
-        return error_json
+            logger.error(' %s: %s' % (m.property, m.message))
+            return error_json
     except InvalidSignatureError as e:
         logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
         return error_json
     # except Exception as e:
-    #     logger.error(f'Got internal exception: {e.message}')
+    # logger.error(f'Got internal exception: {e.message}')
 
     else:
         ok_json = utils.create_success_response(
@@ -94,13 +115,13 @@ def postback(line_event):
         else:
             line_bot_api.reply_message(
                 line_event.reply_token,
-                TextSendMessage(text='まだ実装してないよ。ごめんね！！'))
+                            TextSendMessage(text='まだ実装してないよ。ごめんね！！'))
     except Exception as e:
         line_bot_api.reply_message(
-            line_event.reply_token,
-            TextSendMessage(text=f'サーバー内部でエラーが発生しました。\n{str(e)}'))
+                    line_event.reply_token,
+                    TextSendMessage(text=f'サーバー内部でエラーが発生しました。\n{str(e)}'))
         raise e
 
 if __name__ == '__main__':
     print('line-api-use-case-flask:main')
-    app.run()
+app.run()
