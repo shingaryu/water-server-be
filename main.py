@@ -25,12 +25,74 @@ from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 from urllib.parse import parse_qs, urlparse
 
+# 変更1
+from repositories.mongo_repository import find_recent_events
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta
+#変更1ここまで
+
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 app = Flask(__name__)
 
+# 変更2
+scheduler = BackgroundScheduler(daemon=True)
+#変更2ここまで
+
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
+
+#変更3: 指定した時間差time_differenceがh時間m分s秒以内か判断するプログラム
+def is_over_n_hours(time_difference, h, m, s):
+    time_hms = timedelta(hours=h, minutes=m, seconds=s)
+    return time_difference <= time_hms
+#変更3ここまで
+
+# 変更4: 20分ごとに実行するプログラムの中身
+def my_job():
+    #直近のイベントメッセージを取得
+    message = show_recent_event_message()
+    #直近のイベントの時刻情報を取得し、現在時刻との時間差を求める
+    results = find_recent_events(1)
+    recent_time = results[0]["startTime"]
+    current_time = datetime.now()
+    """
+    #デバッグ用
+    date_string = '2023-06-03 17:54:15'
+    recent_time = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+    """
+    delta_time = recent_time - current_time
+    print(current_time)
+    print(recent_time)
+    print(delta_time)
+    #直近のイベント時刻までの時間が2日以内且つ1日23時間40分以上の時にメッセージと投票状況を送信
+    if is_over_n_hours(delta_time,48,0,0) and not is_over_n_hours(delta_time,47,40,0):
+        try:
+            text_message = TextSendMessage(text='【自動配信】次回の開催まであと２日です。参加状況を連絡します。投票がまだの方は投票してください。')
+            messages = [text_message, message]
+            line_bot_api.broadcast(messages = messages)
+            print('メッセージを送信しました')
+        except LineBotApiError as e:
+            print('メッセージの送信に失敗しました:', e)
+    #直近のイベント時刻までの時間が12時間以内且つ11時間40分以上の時にメッセージと投票状況を送信
+    if is_over_n_hours(delta_time,12,0,0) and not is_over_n_hours(delta_time,11,40,0):
+        try:
+            text_message = TextSendMessage(text='【自動配信】次回の開催まであと半日です。参加状況を連絡します。投票がまだの方は投票してください。')
+            messages = [text_message, message]
+            line_bot_api.broadcast(messages = messages)
+            print('メッセージを送信しました')
+        except LineBotApiError as e:
+            print('メッセージの送信に失敗しました:', e)
+    print('20分ごとに実行されるプログラム')
+# 変更4ここまで
+
+# 変更5: 20分ごとにmy_jobを実行するよう指示
+# @app.before_first_request
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(my_job, 'interval', minutes=20)
+    scheduler.start()
+# 変更5ここまで
 
 @app.route("/")
 def hello_world():
@@ -110,4 +172,7 @@ def postback(line_event):
 
 if __name__ == '__main__':
     print('line-api-use-case-flask:main')
+    #変更6
+    start_scheduler()
+    # 変更6ここまで
     app.run()
