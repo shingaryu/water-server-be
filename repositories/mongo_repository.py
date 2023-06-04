@@ -23,8 +23,8 @@ def find_recent_events(n_items):
     logger.info(f'Get first {n_items} events...')
 
     current_time = datetime.now()
-    query = {"startTime": {"$gt": current_time}}
-    sort_condition = [("startTime", pymongo.ASCENDING)]
+    query = {"endTime": {"$gt": current_time}}
+    sort_condition = [("endTime", pymongo.ASCENDING)]
 
     results = list(events_collection.find(query).sort(sort_condition).limit(n_items))
 
