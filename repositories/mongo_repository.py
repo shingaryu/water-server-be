@@ -75,6 +75,14 @@ def delete_entry(id):
     logger.debug(f'{result.deleted_count} document(s) deleted')
     return result
 
+def update_event(oid, field_dict_to_update):
+    logger.info(f'Update event {str(oid)} with {field_dict_to_update}...')
+    filter = {"_id": oid}
+    update = {'$set': field_dict_to_update}
+    result = events_collection.update_one(filter, update)
+    logger.debug(f'{result.matched_count} event(s) matched, {result.modified_count} event(s) modified')
+    return result
+
 # if __name__ == '__main__':
 #     print('mongo_repository:main')
 #     find_recent_events(2)
