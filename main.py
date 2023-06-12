@@ -40,7 +40,7 @@ scheduler = BackgroundScheduler(daemon=True)
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
-REMIND_INTERVAL_MIN = 20
+REMIND_INTERVAL_MIN = 60
 REMIND_SOONER_THAN_HOURS = 24
 
 #指定した時間差time_differenceがh時間m分s秒以内か判断するプログラム
