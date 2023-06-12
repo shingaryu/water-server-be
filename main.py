@@ -1,5 +1,6 @@
 from bson import ObjectId
 from dotenv import load_dotenv
+from pymongo.errors import PyMongoError
 
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON
@@ -39,46 +40,58 @@ scheduler = BackgroundScheduler(daemon=True)
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
+REMIND_INTERVAL_MIN = 20
+REMIND_SOONER_THAN_HOURS = 24
+
 #指定した時間差time_differenceがh時間m分s秒以内か判断するプログラム
 def is_over_n_hours(time_difference, h, m, s):
     time_hms = timedelta(hours=h, minutes=m, seconds=s)
     return time_difference <= time_hms
 
-#20分ごとに実行するプログラムの中身
-def my_job():
+#REMIND_INTERVAL_MIN分ごとに実行するプログラムの中身
+def remind_closest_event():
+    logger.info(f'{REMIND_INTERVAL_MIN}分ごとに実行されるプログラム')
+
     #直近のイベントメッセージを取得
     message = show_recent_event_message()
     #直近のイベントの時刻情報を取得し、現在時刻との時間差を求める
     results = find_recent_events(1)
+    if len(results) == 0:
+        logger.info('開催予定のイベントはありません。')
+        return
+    
     recent_time = results[0]["startTime"]
     current_time = datetime.now()
     delta_time = recent_time - current_time
-    print(current_time)
-    print(recent_time)
-    print(delta_time)
+    logger.debug(f'現在時刻: {current_time}')
+    logger.debug(f'イベント時刻: {recent_time}')
+    logger.debug(f'イベント時刻まであと: {delta_time}')
+
     #直近のイベントのリマインド済みフラグ情報を取得
     isRemindedFlag = results[0].get('isReminded', False)
-    #直近のイベント時刻までの時間が24時間以内且つリマインド済みでない場合にメッセージと投票状況を送信
-    if is_over_n_hours(delta_time,24,0,0) and not isRemindedFlag:
+    #直近のイベント時刻までの時間がREMIND_SOONER_THAN_HOURS時間以内且つリマインド済みでない場合にメッセージと投票状況を送信
+    if is_over_n_hours(delta_time,REMIND_SOONER_THAN_HOURS,0,0) and not isRemindedFlag:
         try:
-            text_message = TextSendMessage(text='【自動配信】次回の開催まであと1日です。参加状況を連絡します。投票がまだの方は投票してください。')
-            messages = [text_message, message]
-            line_bot_api.broadcast(messages = messages)
+            #(a)メッセージ送信 -> (b)MongoDBへの保存 の順番だと、(b)だけ失敗する状況でメッセージが送られ続けてしまうので、(b) -> (a)の順番にしておく
             #イベントにリマインド済みフラグを設定
-            print('mongo_repository:main')
+            logger.debug('イベントにリマインド済みフラグを設定...')
             oid = results[0]['_id']
             field_to_update = {'isReminded': True}
             update_event(oid, field_to_update)
-            
-            print('メッセージを送信しました')
-        except LineBotApiError as e:
-            print('メッセージの送信に失敗しました:', e)
-    print('20分ごとに実行されるプログラム')
 
-#20分ごとにmy_jobを実行するよう指示
+            text_message = TextSendMessage(text='【自動配信】次回の開催まであと1日です。参加状況を連絡します。投票がまだの方は投票してください。')
+            messages = [text_message, message]
+            line_bot_api.broadcast(messages = messages)
+            logger.info('メッセージを送信しました')
+        except PyMongoError as e:
+            logger.error("DBへの保存に失敗しました:", e)
+        except LineBotApiError as e:
+            logger.error('メッセージの送信に失敗しました:', e)
+
+#REMIND_INTERVAL_MIN分ごとにremind_closest_eventを実行するよう指示
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(my_job, 'interval', minutes=20)
+    scheduler.add_job(remind_closest_event, 'interval', minutes=REMIND_INTERVAL_MIN)
     scheduler.start()
 
 @app.route("/")
