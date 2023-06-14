@@ -23,8 +23,8 @@ def find_recent_events(n_items):
     logger.info(f'Get first {n_items} events...')
 
     current_time = datetime.now()
-    query = {"startTime": {"$gt": current_time}}
-    sort_condition = [("startTime", pymongo.ASCENDING)]
+    query = {"endTime": {"$gt": current_time}}
+    sort_condition = [("endTime", pymongo.ASCENDING)]
 
     results = list(events_collection.find(query).sort(sort_condition).limit(n_items))
 
@@ -73,6 +73,14 @@ def delete_entry(id):
     result = entries_collection.delete_one(filter)
 
     logger.debug(f'{result.deleted_count} document(s) deleted')
+    return result
+
+def update_event(oid, field_dict_to_update):
+    logger.info(f'Update event {str(oid)} with {field_dict_to_update}...')
+    filter = {"_id": oid}
+    update = {'$set': field_dict_to_update}
+    result = events_collection.update_one(filter, update)
+    logger.debug(f'{result.matched_count} event(s) matched, {result.modified_count} event(s) modified')
     return result
 
 # if __name__ == '__main__':
