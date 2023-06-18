@@ -69,6 +69,8 @@ def remind_closest_event():
 
     #直近のイベントのリマインド済みフラグ情報を取得
     isRemindedFlag = results[0].get('isReminded', False)
+    logger.debug(f'リマインド済み: {isRemindedFlag}')
+
     #直近のイベント時刻までの時間がREMIND_SOONER_THAN_HOURS時間以内且つリマインド済みでない場合にメッセージと投票状況を送信
     if is_over_n_hours(delta_time,REMIND_SOONER_THAN_HOURS,0,0) and not isRemindedFlag:
         try:
@@ -90,9 +92,14 @@ def remind_closest_event():
 
 #REMIND_INTERVAL_MIN分ごとにremind_closest_eventを実行するよう指示
 def start_scheduler():
+    logger.info('schedulerジョブを設定します...')
+    logger.debug(f'REMIND_INTERVAL_MIN: {REMIND_INTERVAL_MIN}')
+    logger.debug(f'REMIND_SOONER_THAN_HOURS: {REMIND_SOONER_THAN_HOURS}')
     scheduler = BackgroundScheduler()
     scheduler.add_job(remind_closest_event, 'interval', minutes=REMIND_INTERVAL_MIN)
     scheduler.start()
+
+start_scheduler()
 
 @app.route("/")
 def hello_world():
@@ -171,6 +178,5 @@ def postback(line_event):
         raise e
 
 if __name__ == '__main__':
-    print('line-api-use-case-flask:main')
-    start_scheduler()
+    logger.info('water-server-be main function')
     app.run()
