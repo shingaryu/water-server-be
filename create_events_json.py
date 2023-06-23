@@ -3,8 +3,12 @@ import calendar
 import datetime
 import pprint
 
-specified_month = datetime.date.today().month + 1
-specified_year = datetime.date.today().year
+t_delta = datetime.timedelta(hours=9)
+JST = datetime.timezone(t_delta, 'JST')
+now = datetime.datetime.now(JST)
+
+specified_month = str(int(now.strftime("%m")) + 1).zfill(2)
+specified_year = now.strftime("%Y")
 
 
 def extract_date_of_nth_day_of_week(year, month, nth_of_day_of_week, day_of_week):
@@ -18,7 +22,7 @@ def extract_date_of_nth_day_of_week(year, month, nth_of_day_of_week, day_of_week
     if nth_of_day_of_week < 1 or day_of_week < 0 or day_of_week > 6:
         return None
 
-    first_day_of_week, n = calendar.monthrange(year, month)
+    first_day_of_week, n = calendar.monthrange(int(year), int(month))
     day = 7 * (nth_of_day_of_week - 1) + (day_of_week - first_day_of_week) % 7 + 1
 
     return day if day <= n else None
@@ -39,10 +43,10 @@ def extract_badminton_date(month=specified_month, year=specified_year):
         return badminton_date_list_of_day_of_week
 
     badminton_date_list_of_friday \
-        = list(map(lambda date_of_friday: str(specified_year) + "-" + str(specified_month) + "-" + str(date_of_friday)
+        = list(map(lambda date_of_friday: year + "-" + month + "-" + str(date_of_friday)
                    , extract_badminton_date_by_day_of_week(4)))
     badminton_date_list_of_sunday \
-        = list(map(lambda date_of_sunday: str(specified_year) + "-" + str(specified_month) + "-" + str(date_of_sunday)
+        = list(map(lambda date_of_sunday: year + "-" + month + "-" + str(date_of_sunday)
                    , extract_badminton_date_by_day_of_week(6)))
 
     badminton_date_list_of_specified_month \
@@ -75,6 +79,7 @@ def generate_badminton_schedule(badminton_date, day_of_week):
 
     badminton_schedule_in_selected_sports_hall = None
     if day_of_week == 0:
+
         badminton_schedule_in_selected_sports_hall = shimura_2nd
     elif day_of_week == 1:
         badminton_schedule_in_selected_sports_hall = shimura_4th
@@ -82,15 +87,15 @@ def generate_badminton_schedule(badminton_date, day_of_week):
 
 
 def create_json(badminton_schedule):
-    with open("./WaterCooler_schedule_" + str(specified_year) + "-" + str(specified_month) + ".json", 'w') as f:
+    with open("./WaterCooler_schedule_" + specified_year + "-" + specified_month + ".json", 'w') as f:
         json.dump(badminton_schedule, f, indent=2, ensure_ascii=False)
 
 
 if __name__ == '__main__':
     # print(calendar.month(specified_year, specified_month))
-    select_month = input(str(specified_year) + "/" + str(specified_month) + "のスケジュールを作成しますか？[y/n]").lower()
+    select_month = input(specified_year + "/" + specified_month + "のスケジュールを作成しますか？[y/n]").lower()
     if select_month in ['', 'y', 'ye', 'yes']:
-        print(str(specified_month), "月のスケジュールを作成します")
+        print(specified_month, "月のスケジュールを作成します")
         schedules = []
         for dow in range(len(extract_badminton_date())):
             if dow == 0:
