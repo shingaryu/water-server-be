@@ -57,26 +57,26 @@ def extract_badminton_date(month=specified_month, year=specified_year):
 
 
 def generate_badminton_schedule(badminton_date, day_of_week):
-    shimura_2nd = [{"startTime": {"$date": badminton_date + "T18:00:00.000Z"},
+    shimura_2nd = {"startTime": {"$date": badminton_date + "T18:00:00.000Z"},
                     "endTime": {"$date": badminton_date + "T21:00:00.000Z"},
                     "place": "志村第二小学校",
                     "entryOptions": [{"id": "1", "text": "18時から参加"},
                                      {"id": "2", "text": "19時過ぎから参加"},
-                                     {"id": "3", "text": "不参加"}]}]
+                                     {"id": "3", "text": "不参加"}]}
 
-    shimura_4th = [{"startTime": {"$date": badminton_date + "T09:00:00.000Z"},
+    shimura_4th = {"startTime": {"$date": badminton_date + "T09:00:00.000Z"},
                     "endTime": {"$date": badminton_date + "T12:00:00.000Z"},
                     "place": "志村第四小学校",
                     "entryOptions": [{"id": "1", "text": "9時から参加"},
                                      {"id": "2", "text": "途中から参加"},
-                                     {"id": "3", "text": "不参加"}]}]
+                                     {"id": "3", "text": "不参加"}]}
 
-    shingashi = [{"startTime": {"$date": badminton_date + "T09:00:00.000Z"},
+    shingashi = {"startTime": {"$date": badminton_date + "T09:00:00.000Z"},
                   "endTime": {"$date": badminton_date + "T12:00:00.000Z"},
                   "place": "新河岸小学校",
                   "entryOptions": [{"id": "1", "text": "9時から参加"},
                                    {"id": "2", "text": "途中から参加"},
-                                   {"id": "3", "text": "不参加"}]}]
+                                   {"id": "3", "text": "不参加"}]}
 
     badminton_schedule_in_selected_sports_hall = None
     if day_of_week == 0:
