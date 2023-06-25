@@ -43,11 +43,12 @@ def extract_badminton_date(month=specified_month, year=specified_year):
         return badminton_date_list_of_day_of_week
 
     badminton_date_list_of_friday \
-        = list(map(lambda date_of_friday: year + "-" + month + "-" + str(date_of_friday)
-                   , extract_badminton_date_by_day_of_week(4)))
+        = [year + "-" + month + "-" + str(date_of_friday).zfill(2)
+           for date_of_friday in extract_badminton_date_by_day_of_week(4)]
+
     badminton_date_list_of_sunday \
-        = list(map(lambda date_of_sunday: year + "-" + month + "-" + str(date_of_sunday)
-                   , extract_badminton_date_by_day_of_week(6)))
+        = [year + "-" + month + "-" + str(date_of_sunday).zfill(2)
+           for date_of_sunday in extract_badminton_date_by_day_of_week(6)]
 
     badminton_date_list_of_specified_month \
         = [badminton_date_list_of_friday, badminton_date_list_of_sunday]
