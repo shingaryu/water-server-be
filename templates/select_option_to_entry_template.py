@@ -1,111 +1,67 @@
+import json
+
 from common.consts import ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
 from common.utils import format_date
 
-
-def attendees_box(attendees):
-    contents = []
-    for attendee in attendees:
-        contents.append(
-            {
-                "type": "image",
-                "url": attendee["pictureUrl"],
-                "size": "18px",
-                "position": "absolute",
-                "offsetStart": "4px"
-
-            },
-        )
-
-        contents.append(
-            {
-                "type": "text",
-                "text": attendee["displayName"],
-                "size": "14px",
-                "offsetStart": "26px",
-            },
-        )
-
-    box = {
-        "type": "box",
-        "layout": "horizontal",
-        "contents": contents
-    }
-    return box
-
-
-def absentees_box(absentees):
-    contents = []
-    for absentee in absentees:
-        contents.append(
-            {
-                "type": "image",
-                "url": absentee["pictureUrl"],
-                "size": "18px",
-                "position": "absolute",
-                "offsetStart": "4px"
-
-            }
-        )
-
-        contents.append(
-            {
-                "type": "text",
-                "text": absentee["displayName"],
-                "size": "14px",
-                "offsetStart": "26px",
-                "color": "#00000000"
-            },
-        )
-
-    box = {
-        "type": "box",
-        "layout": "horizontal",
-        "contents": contents
-    }
-    return box
+WATER_COOLER_BLUE = "#007AFF"
+MIDNIGHT_BLUE = "#001E43"
+FROSTY_BLUE = "#BBDBF3"
+SMOKE_BLUE = "#A4C1D7"
+SNOW_WHITE = "#FAFDFF"
+TRANSPARENT = "#00000000"
 
 
 def select_option_to_entry_flex_contents(event, entry_option_status):
+    entry_option_status = create_test_attendees_list(entry_option_status, 3, 7, 5)  # 複数人UIテスト用
+
     total_count = 0
     for (option, attendees) in entry_option_status:
         total_count += len(attendees)
 
-    attendees_list = []
-    for (option, attendees) in entry_option_status:
-        tmp = option["id"]
-        if "1" in option.values():
-            attendees_list.append(attendees_box(attendees))
+    gym_img_url = load_gym_img_url(event)
+    attendees_list = create_attendees_list(entry_option_status)
 
-        elif "2" in option.values():
-            attendees_list.append(attendees_box(attendees))
+    height_of_attendees_list_of_registered_block = "140px"
+    height_of_body_block = "360px"
+    tmp = len(entry_option_status[0][1])
+    if len(entry_option_status[0][1]) >= 7 or len(entry_option_status[1][1]) >= 7:
+        attendees_length = len(entry_option_status[0][1])
+        if len(entry_option_status[0][1]) < len(entry_option_status[1][1]):
+            attendees_length = len(entry_option_status[1][1])
 
-        elif "3" in option.values():
-            attendees_list.append(absentees_box(attendees))
+        height_of_attendees_list_of_registered_block = str(140 + (20*(attendees_length-6))) + "px"
+        height_of_body_block = str(360 + (20*(attendees_length-6))) + "px"
+
+
+    tmp = len(attendees_list[0].get("contents")) / 2
 
     container_config = {
         "type": "bubble",
         "size": "mega",
-        "direction": "ltr",
     }
     header_block = {
         "header": {
             "type": "box",
             "layout": "vertical",
+            "height": "40px",
             "contents": [
                 {
                     "type": "text",
                     "text": format_date(event["startTime"]) + " 参加登録",
-                    "color": "#F2F2F7",
+                    "color": SNOW_WHITE,
+                    "position": "absolute",
                     "weight": "bold",
-                    "size": "lg"
+                    "size": "lg",
+                    "offsetTop": "10px",
+                    "offsetStart": "10px"
                 }
             ],
             "background": {
                 "type": "linearGradient",
                 "angle": "160deg",
-                "startColor": "#007AFF",
-                "endColor": "#64D2FF",
-                "centerPosition": "50%"
+                "startColor": WATER_COOLER_BLUE,
+                "endColor": FROSTY_BLUE,
+                "centerPosition": "50%",
             }
         }
     }
@@ -122,7 +78,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                     "position": "absolute",
                     "offsetTop": "0px",
                     "offsetStart": "0px",
-                    "url": "https://drive.google.com/uc?id=1BuemrYDy0Gq_vbAUP_Xi1Ly82FSHUynR"
+                    "url": gym_img_url
                 },
                 {
                     "type": "box",
@@ -131,19 +87,19 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                         {
                             "type": "text",
                             "text": event["place"],
-                            "color": "#F2F2F7AA",
+                            "color": SNOW_WHITE,
                             "weight": "regular",
                         }
 
                     ],
                     "position": "absolute",
-                    "backgroundColor": "#001E43AA",
+                    "backgroundColor": MIDNIGHT_BLUE + "AA",
                     "cornerRadius": "xxl",
                     "alignItems": "center",
                     "width": "150px",
-                    "height": "40px",
+                    "height": "20px",
                     "offsetEnd": "-15px",
-                    "offsetBottom": "-20px"
+                    "offsetTop": "10px"
                 },
             ],
             "height": "80px"
@@ -168,38 +124,32 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                     {
                                         "type": "text",
                                         "text": "参加　",
-                                        "color": "#001E43",
+                                        "color": MIDNIGHT_BLUE,
                                         "weight": "bold",
                                         "decoration": "underline"
                                     }, {
                                         "type": "text",
                                         "text": str(len(entry_option_status[0][1])),
-                                        "color": "#001E43",
+                                        "color": MIDNIGHT_BLUE,
                                         "weight": "regular",
                                         "align": "end"
-                                    }
+                                    },
                                 ]
                             },
-                            {
-                                "type": "box",
-                                "layout": "vertical",
-                                "contents": [
-                                    attendees_list[0],
-                                ]
-                            }
+                            attendees_list[0],
+
                         ],
-                        # "borderColor": "#007AFF",
-                        "backgroundColor": "#001E4308",
+                        "backgroundColor": MIDNIGHT_BLUE + "08",
                         "flex": 1,
                         "width": "48%",
-                        "height": "140px",
+                        "height": height_of_attendees_list_of_registered_block,
                         "borderWidth": "2px",
                         "cornerRadius": "xs"
                     },
                     {
                         "type": "separator",
                         "margin": "md",
-                        "color": "#00000000"
+                        "color": TRANSPARENT
                     },
                     {
                         "type": "box",
@@ -212,13 +162,13 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                     {
                                         "type": "text",
                                         "text": "途中参加　",
-                                        "color": "#001E43",
+                                        "color": MIDNIGHT_BLUE,
                                         "weight": "bold",
                                         "decoration": "underline"
                                     }, {
                                         "type": "text",
                                         "text": str(len(entry_option_status[1][1])),
-                                        "color": "#001E43",
+                                        "color": MIDNIGHT_BLUE,
                                         "weight": "regular",
                                         "align": "end"
                                     }
@@ -232,10 +182,9 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                 ]
                             }
                         ],
-                        # "borderColor": "#007AFF",
-                        "backgroundColor": "#001E4308",
+                        "backgroundColor": MIDNIGHT_BLUE + "08",
                         "flex": 1,
-                        "height": "140px",
+                        "height": height_of_attendees_list_of_registered_block,
                         "width": "48%",
                         "borderWidth": "2px",
                         "cornerRadius": "xs"
@@ -254,36 +203,23 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                             {
                                 "type": "text",
                                 "text": "不参加　",
-                                "color": "#001E43",
+                                "color": MIDNIGHT_BLUE,
                                 "weight": "bold",
                                 "decoration": "underline"
                             }, {
                                 "type": "text",
                                 "text": str(len(entry_option_status[2][1])),
-                                "color": "#001E43",
+                                "color": MIDNIGHT_BLUE,
                                 "weight": "regular",
                                 "align": "end"
                             }
                         ]
                     },
-                    {
-                        "type": "box",
-                        "layout": "horizontal",
-                        "contents": [
-                            {
-                                "type": "box",
-                                "layout": "horizontal",
-                                "contents": [
-                                    attendees_list[2],
-                                ]
-                            }
-                        ]
-                    }
+                    attendees_list[2]
                 ],
                 "width": "100%",
-                "height": "60px",
-                # "borderColor": "#007AFF",
-                "backgroundColor": "#001E4308",
+                "height": "45px",
+                "backgroundColor": MIDNIGHT_BLUE + "08",
                 "borderWidth": "2px",
                 "margin": "sm",
                 "spacing": "none",
@@ -301,8 +237,8 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                 "contents": [
                     {
                         "type": "separator",
-                        "margin": "md",
-                        "color": "#00000000"
+                        "margin": "lg",
+                        "color": TRANSPARENT
                     },
                     {
                         "type": "box",
@@ -315,17 +251,17 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                     {
                                         "type": "text",
                                         "text": "参加",
-                                        "color": "#F2F2F7",
+                                        "color": SNOW_WHITE,
                                         "weight": "bold"
                                     }
                                 ],
                                 "borderWidth": "normal",
-                                "borderColor": "#007AFF",
+                                "borderColor": WATER_COOLER_BLUE,
                                 "cornerRadius": "xxl",
                                 "height": "40px",
                                 "alignItems": "center",
                                 "justifyContent": "center",
-                                "backgroundColor": "#007AFFEE",
+                                "backgroundColor": WATER_COOLER_BLUE + "EE",
                                 "action": {
                                     "type": "postback",
                                     "label": "action",
@@ -336,7 +272,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                             {
                                 "type": "separator",
                                 "margin": "xs",
-                                "color": "#00000000"
+                                "color": TRANSPARENT
                             },
                             {
                                 "type": "box",
@@ -345,17 +281,17 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                     {
                                         "type": "text",
                                         "text": "途中参加",
-                                        "color": "#F2F2F7",
+                                        "color": SNOW_WHITE,
                                         "weight": "bold"
                                     }
                                 ],
                                 "borderWidth": "normal",
-                                "borderColor": "#007AFF",
+                                "borderColor": WATER_COOLER_BLUE,
                                 "cornerRadius": "xxl",
                                 "height": "40px",
                                 "alignItems": "center",
                                 "justifyContent": "center",
-                                "backgroundColor": "#007AFFEE",
+                                "backgroundColor": WATER_COOLER_BLUE + "EE",
                                 "action": {
                                     "type": "postback",
                                     "label": "action",
@@ -369,7 +305,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                     {
                         "type": "separator",
                         "margin": "sm",
-                        "color": "#00000000"
+                        "color": TRANSPARENT
                     },
                     {
                         "type": "box",
@@ -378,7 +314,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                             {
                                 "type": "text",
                                 "text": "不参加",
-                                "color": "#F2F2F7",
+                                "color": SNOW_WHITE,
                                 "weight": "regular"
                             }
                         ],
@@ -386,7 +322,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                         "cornerRadius": "xxl",
                         "height": "40px",
                         "alignItems": "center",
-                        "backgroundColor": "#001E4344",
+                        "backgroundColor": SMOKE_BLUE + "AA",
                         "justifyContent": "center",
                         "action": {
                             "type": "postback",
@@ -421,36 +357,35 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                         {
                             "type": "text",
                             "text": "登録状況",
-                            "color": "#001E43",
+                            "color": MIDNIGHT_BLUE,
                             "weight": "bold",
                             "size": "lg",
-                            "align": "end"
+                            "align": "end",
                         }, {
                             "type": "text",
                             "text": f"({total_count}人登録中)",
-                            "color": "#001E43",
+                            "color": MIDNIGHT_BLUE,
                             "weight": "regular",
                             "size": "md",
-                            "align": "start"
+                            "align": "start",
                         },
                     ],
-
                 },
                 {
                     "type": "separator",
                     "margin": "sm",
-                    "color": "#00000000"
+                    "color": TRANSPARENT
                 },
                 registered_block,
                 {
                     "type": "separator",
                     "margin": "sm",
-                    "color": "#00000000"
+                    "color": TRANSPARENT
                 },
                 voting_block,
             ],
             "margin": "none",
-            "height": "360px",
+            "height": height_of_body_block,
             "spacing": "none"
         }
     }
@@ -461,3 +396,126 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
     container_config.update(body_block)
 
     return contents
+
+
+def load_gym_img_url(event):
+    gym_img_url = ""
+    if event["place"] == "志村第二小学校":
+        gym_img_url = "https://drive.google.com/uc?id=19pMDPJ4TbrMiHzfV92Ul65Y-sWmiB2qy"
+
+    elif event["place"] == "志村第四小学校":
+        gym_img_url = "https://drive.google.com/uc?id=17PcFtGXbCNtZwxjaod2aKBXQxog5eNFx"
+
+    else:
+        gym_img_url = "https://drive.google.com/uc?id=1vDEYGexYhEime4QIrWc9owtK053bzt6M"
+
+    return gym_img_url
+
+
+def create_attendees_list(entry_option_status):
+    attendees_list = []
+    for (option, attendees) in entry_option_status:
+        if "1" in option.values():
+            attendees_list.append(attendees_box(attendees))
+
+        elif "2" in option.values():
+            attendees_list.append(attendees_box(attendees))
+
+        elif "3" in option.values():
+            attendees_list.append(absentees_box(attendees))
+
+    return attendees_list
+
+
+def attendees_box(attendees):
+    contents = []
+    for attendee in attendees:
+        contents.append({
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+                {
+                    "type": "image",
+                    "url": attendee["pictureUrl"],
+                    "size": "18px",
+                    "position": "absolute",
+                    "offsetStart": "4px"
+
+                }, {
+                    "type": "text",
+                    "text": attendee["displayName"],
+                    "size": "14px",
+                    "offsetStart": "26px",
+                },
+            ]
+        })
+        contents.append({
+            "type": "separator",
+            "margin": "xs",
+            "color": TRANSPARENT
+        })
+
+    box = {
+        "type": "box",
+        "layout": "vertical",
+        "contents": contents
+    }
+    return box
+
+
+def absentees_box(absentees):
+    contents = [{
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [{
+            "type": "text",
+            "text": "→",
+            "color": TRANSPARENT,
+        }]
+    }]
+
+    for loop_count, absentee in enumerate(absentees):
+        contents.append({
+            "type": "box",
+            "layout": "horizontal",
+            "position": "absolute",
+            "offsetStart": str(20 * loop_count + 4) + "px",
+            "contents": [
+                {
+                    "type": "image",
+                    "url": absentee["pictureUrl"],
+                    "size": "18px",
+
+                }, {
+                    "type": "text",
+                    "text": absentee["displayName"],
+                    "size": "14px",
+                    "color": MIDNIGHT_BLUE + "00"
+                },
+            ]
+        })
+
+    box = {
+        "type": "box",
+        "layout": "horizontal",
+        "contents": contents
+
+    }
+    return box
+
+
+def create_test_attendees_list(entry_option_status, sanka, tochu, fusan):
+    test_entry_option_status = entry_option_status
+    attendee = test_entry_option_status[0][1][0]
+    test_entry_option_status[0][1].clear()
+    test_entry_option_status[1][1].clear()
+    test_entry_option_status[2][1].clear()
+
+    for s in range(sanka):
+        test_entry_option_status[0][1].append(attendee)
+    for t in range(tochu):
+        test_entry_option_status[1][1].append(attendee)
+    for f in range(fusan):
+        test_entry_option_status[2][1].append(attendee)
+
+    return test_entry_option_status
