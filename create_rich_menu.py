@@ -17,19 +17,19 @@ RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
 POSTBACK_DATA = [
     f'{SHOW_NEXT_EVENT}',
     f'{SHOW_EVENTS}',
-    f'{AKIO_BUTTON}',
+    f'richmenu/?area=2',
     f'richmenu/?area=3',
     f'richmenu/?area=4',
-    f'richmenu/?area=5',
+    f'{AKIO_BUTTON}'
 ]
 
 DISPLAY_TEXTS = [
-    '次の開催日',
-    '開催日の一覧',
+    '参加登録',
+    '開催日一覧',
+    'YWxidW0=',
+    'bWVtYmVyIGxpc3Q=',
+    '新機能募集中!',
     'はやしあきお',
-    'リッチメニュー3',
-    'リッチメニュー4',
-    'リッチメニュー5',
 ]
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
