@@ -1,5 +1,3 @@
-import json
-
 from common.consts import ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
 from common.utils import format_date
 
@@ -10,30 +8,36 @@ SMOKE_BLUE = "#A4C1D7"
 SNOW_WHITE = "#FAFDFF"
 TRANSPARENT = "#00000000"
 
+ATTENDEES_LIST_INDEX_ATTENDEES = 0
+ATTENDEES_LIST_INDEX_HALFWAYS = 1
+ATTENDEES_LIST_INDEX_ABSENTEES = 2
+
+ENTRY_OPTION_ID_ATTEND = "1"
+ENTRY_OPTION_ID_HALFWAY = "2"
+ENTRY_OPTION_ID_ABSENT = "3"
 
 def select_option_to_entry_flex_contents(event, entry_option_status):
-    entry_option_status = create_test_attendees_list(entry_option_status, 3, 7, 5)  # 複数人UIテスト用
+    # entry_option_status = create_test_attendees_list(entry_option_status, 10, 0, 20)  # 複数人UIテスト用
 
     total_count = 0
     for (option, attendees) in entry_option_status:
         total_count += len(attendees)
 
     gym_img_url = load_gym_img_url(event)
-    attendees_list = create_attendees_list(entry_option_status)
+
+    #注: entry_option_status内の要素は順序を保証しない(例: "id":2 のoptionが先頭に来る場合もある)が、create_attendees_listの返り値は順序を保証している
+    attendees_list, n_registered_list = create_attendees_list(entry_option_status)
 
     height_of_attendees_list_of_registered_block = "140px"
     height_of_body_block = "360px"
-    tmp = len(entry_option_status[0][1])
-    if len(entry_option_status[0][1]) >= 7 or len(entry_option_status[1][1]) >= 7:
-        attendees_length = len(entry_option_status[0][1])
-        if len(entry_option_status[0][1]) < len(entry_option_status[1][1]):
-            attendees_length = len(entry_option_status[1][1])
 
+    n_attendees = n_registered_list[ATTENDEES_LIST_INDEX_ATTENDEES]
+    n_halfways = n_registered_list[ATTENDEES_LIST_INDEX_HALFWAYS]
+    n_absentees = n_registered_list[ATTENDEES_LIST_INDEX_ABSENTEES]
+    if n_attendees >= 7 or n_halfways >= 7:
+        attendees_length = max(n_attendees, n_halfways)
         height_of_attendees_list_of_registered_block = str(140 + (20*(attendees_length-6))) + "px"
         height_of_body_block = str(360 + (20*(attendees_length-6))) + "px"
-
-
-    tmp = len(attendees_list[0].get("contents")) / 2
 
     container_config = {
         "type": "bubble",
@@ -129,14 +133,14 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                         "decoration": "underline"
                                     }, {
                                         "type": "text",
-                                        "text": str(len(entry_option_status[0][1])),
+                                        "text": str(n_attendees),
                                         "color": MIDNIGHT_BLUE,
                                         "weight": "regular",
                                         "align": "end"
                                     },
                                 ]
                             },
-                            attendees_list[0],
+                            attendees_list[ATTENDEES_LIST_INDEX_ATTENDEES],
 
                         ],
                         "backgroundColor": MIDNIGHT_BLUE + "08",
@@ -167,7 +171,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                         "decoration": "underline"
                                     }, {
                                         "type": "text",
-                                        "text": str(len(entry_option_status[1][1])),
+                                        "text": str(n_halfways),
                                         "color": MIDNIGHT_BLUE,
                                         "weight": "regular",
                                         "align": "end"
@@ -178,7 +182,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                 "type": "box",
                                 "layout": "vertical",
                                 "contents": [
-                                    attendees_list[1],
+                                    attendees_list[ATTENDEES_LIST_INDEX_HALFWAYS],
                                 ]
                             }
                         ],
@@ -208,14 +212,14 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                                 "decoration": "underline"
                             }, {
                                 "type": "text",
-                                "text": str(len(entry_option_status[2][1])),
+                                "text": str(n_absentees),
                                 "color": MIDNIGHT_BLUE,
                                 "weight": "regular",
                                 "align": "end"
                             }
                         ]
                     },
-                    attendees_list[2]
+                    attendees_list[ATTENDEES_LIST_INDEX_ABSENTEES]
                 ],
                 "width": "100%",
                 "height": "45px",
@@ -413,18 +417,22 @@ def load_gym_img_url(event):
 
 
 def create_attendees_list(entry_option_status):
-    attendees_list = []
+    attendees_list = [None] * 3
+    entry_option_dict = {}
     for (option, attendees) in entry_option_status:
-        if "1" in option.values():
-            attendees_list.append(attendees_box(attendees))
+        entry_option_dict[option["id"]] = attendees
 
-        elif "2" in option.values():
-            attendees_list.append(attendees_box(attendees))
+    # todo: id:1 -> 参加, id:2 -> 途中参加, id:3 -> 不参加 の定義付け
+    attendees_list[ATTENDEES_LIST_INDEX_ATTENDEES] = attendees_box(entry_option_dict.get(ENTRY_OPTION_ID_ATTEND, []))
+    attendees_list[ATTENDEES_LIST_INDEX_HALFWAYS] = attendees_box(entry_option_dict.get(ENTRY_OPTION_ID_HALFWAY, []))
+    attendees_list[ATTENDEES_LIST_INDEX_ABSENTEES] = absentees_box(entry_option_dict.get(ENTRY_OPTION_ID_ABSENT, []))
 
-        elif "3" in option.values():
-            attendees_list.append(absentees_box(attendees))
+    n_registered_list = [None] * 3
+    n_registered_list[ATTENDEES_LIST_INDEX_ATTENDEES] = len(entry_option_dict.get(ENTRY_OPTION_ID_ATTEND, []))
+    n_registered_list[ATTENDEES_LIST_INDEX_HALFWAYS] = len(entry_option_dict.get(ENTRY_OPTION_ID_HALFWAY, []))
+    n_registered_list[ATTENDEES_LIST_INDEX_ABSENTEES] = len(entry_option_dict.get(ENTRY_OPTION_ID_ABSENT, []))
 
-    return attendees_list
+    return attendees_list, n_registered_list
 
 
 def attendees_box(attendees):
