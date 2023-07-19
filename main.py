@@ -178,5 +178,5 @@ def postback(line_event):
         raise e
 
 if __name__ == '__main__':
-    logger.info('water-server-be main function')
+    logger.info('開発サーバーモードでFlaskアプリケーションを起動します…')
     app.run()
