@@ -47,7 +47,7 @@ rich_menu_to_create = RichMenu(
     size=RichMenuSize(width=2500, height=1686),
     selected=True,
     name="water-server-menu_" + now.strftime("%Y-%m-%d_%H-%M-%S"),
-    chat_bar_text=f'{now.strftime("%Y-%m-%d")}',
+    chat_bar_text='メニュー',
     areas=[RichMenuArea(
         bounds=RichMenuBounds(x=(i % 3) * 833, y=(i // 3) * 843, width=833, height=843),
         action=PostbackAction(data=POSTBACK_DATA[i], display_text=DISPLAY_TEXTS[i])) for i in range(6)]
