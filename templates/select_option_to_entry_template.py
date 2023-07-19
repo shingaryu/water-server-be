@@ -16,8 +16,9 @@ ENTRY_OPTION_ID_ATTEND = "1"
 ENTRY_OPTION_ID_HALFWAY = "2"
 ENTRY_OPTION_ID_ABSENT = "3"
 
+
 def select_option_to_entry_flex_contents(event, entry_option_status):
-    # entry_option_status = create_test_attendees_list(entry_option_status, 10, 0, 20)  # 複数人UIテスト用
+    # entry_option_status = create_test_attendees_list(entry_option_status, 10, 0, 12)  # 複数人UIテスト用
 
     total_count = 0
     for (option, attendees) in entry_option_status:
@@ -25,7 +26,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
 
     gym_img_url = load_gym_img_url(event)
 
-    #注: entry_option_status内の要素は順序を保証しない(例: "id":2 のoptionが先頭に来る場合もある)が、create_attendees_listの返り値は順序を保証している
+    # 注: entry_option_status内の要素は順序を保証しない(例: "id":2 のoptionが先頭に来る場合もある)が、create_attendees_listの返り値は順序を保証している
     attendees_list, n_registered_list = create_attendees_list(entry_option_status)
 
     height_of_attendees_list_of_registered_block = "140px"
@@ -36,8 +37,8 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
     n_absentees = n_registered_list[ATTENDEES_LIST_INDEX_ABSENTEES]
     if n_attendees >= 7 or n_halfways >= 7:
         attendees_length = max(n_attendees, n_halfways)
-        height_of_attendees_list_of_registered_block = str(140 + (20*(attendees_length-6))) + "px"
-        height_of_body_block = str(360 + (20*(attendees_length-6))) + "px"
+        height_of_attendees_list_of_registered_block = str(140 + (20 * (attendees_length - 6))) + "px"
+        height_of_body_block = str(360 + (20 * (attendees_length - 6))) + "px"
 
     container_config = {
         "type": "bubble",
@@ -60,13 +61,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                     "offsetStart": "10px"
                 }
             ],
-            "background": {
-                "type": "linearGradient",
-                "angle": "160deg",
-                "startColor": WATER_COOLER_BLUE,
-                "endColor": FROSTY_BLUE,
-                "centerPosition": "50%",
-            }
+            "backgroundColor": WATER_COOLER_BLUE,
         }
     }
     hero_block = {
@@ -403,15 +398,14 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
 
 
 def load_gym_img_url(event):
-    gym_img_url = ""
     if event["place"] == "志村第二小学校":
         gym_img_url = "https://drive.google.com/uc?id=19pMDPJ4TbrMiHzfV92Ul65Y-sWmiB2qy"
 
     elif event["place"] == "志村第四小学校":
-        gym_img_url = "https://drive.google.com/uc?id=17PcFtGXbCNtZwxjaod2aKBXQxog5eNFx"
+        gym_img_url = "https://drive.google.com/uc?id=1BuemrYDy0Gq_vbAUP_Xi1Ly82FSHUynR"
 
     else:
-        gym_img_url = "https://drive.google.com/uc?id=1vDEYGexYhEime4QIrWc9owtK053bzt6M"
+        gym_img_url = "https://drive.google.com/uc?id=11JTurANpTrHuWhDTXlInnntWOZvouQK-"
 
     return gym_img_url
 
