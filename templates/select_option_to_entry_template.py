@@ -345,7 +345,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                     "offsetTop": "0px",
                     "offsetStart": "0px",
                     "aspectRatio": "1:2",
-                    "size": "120%",
+                    "size": "300px", # 相対値[%]で指定した場合、デバイスによって挙動が大きく変わる(原因不明)
                     "aspectMode": "cover"
                 },
                 {
