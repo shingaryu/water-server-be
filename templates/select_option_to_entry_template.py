@@ -29,16 +29,11 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
     # 注: entry_option_status内の要素は順序を保証しない(例: "id":2 のoptionが先頭に来る場合もある)が、create_attendees_listの返り値は順序を保証している
     attendees_list, n_registered_list = create_attendees_list(entry_option_status)
 
-    height_of_attendees_list_of_registered_block = "140px"
-    height_of_body_block = "360px"
+    min_height_of_attendees_list = "140px"
 
     n_attendees = n_registered_list[ATTENDEES_LIST_INDEX_ATTENDEES]
     n_halfways = n_registered_list[ATTENDEES_LIST_INDEX_HALFWAYS]
     n_absentees = n_registered_list[ATTENDEES_LIST_INDEX_ABSENTEES]
-    if n_attendees >= 7 or n_halfways >= 7:
-        attendees_length = max(n_attendees, n_halfways)
-        height_of_attendees_list_of_registered_block = str(140 + (20 * (attendees_length - 6))) + "px"
-        height_of_body_block = str(360 + (20 * (attendees_length - 6))) + "px"
 
     container_config = {
         "type": "bubble",
@@ -141,7 +136,6 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                         "backgroundColor": MIDNIGHT_BLUE + "08",
                         "flex": 1,
                         "width": "48%",
-                        "height": height_of_attendees_list_of_registered_block,
                         "borderWidth": "2px",
                         "cornerRadius": "xs"
                     },
@@ -149,6 +143,12 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                         "type": "separator",
                         "margin": "md",
                         "color": TRANSPARENT
+                    },
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [],
+                        "height": min_height_of_attendees_list
                     },
                     {
                         "type": "box",
@@ -183,7 +183,6 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                         ],
                         "backgroundColor": MIDNIGHT_BLUE + "08",
                         "flex": 1,
-                        "height": height_of_attendees_list_of_registered_block,
                         "width": "48%",
                         "borderWidth": "2px",
                         "cornerRadius": "xs"
@@ -384,7 +383,6 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                 voting_block,
             ],
             "margin": "none",
-            "height": height_of_body_block,
             "spacing": "none"
         }
     }
@@ -435,19 +433,20 @@ def attendees_box(attendees):
         contents.append({
             "type": "box",
             "layout": "horizontal",
+            "spacing": "4px",
+            "paddingStart": "4px",
+            "paddingEnd": "4px",
             "contents": [
                 {
                     "type": "image",
+                    "flex": 0,
                     "url": attendee["pictureUrl"],
                     "size": "18px",
-                    "position": "absolute",
-                    "offsetStart": "4px"
-
                 }, {
                     "type": "text",
+                    "flex": 0,
                     "text": attendee["displayName"],
                     "size": "14px",
-                    "offsetStart": "26px",
                 },
             ]
         })
@@ -465,43 +464,22 @@ def attendees_box(attendees):
     return box
 
 
+# だいたい12人目以降が見切れる
 def absentees_box(absentees):
-    contents = [{
-        "type": "box",
-        "layout": "horizontal",
-        "contents": [{
-            "type": "text",
-            "text": "→",
-            "color": TRANSPARENT,
-        }]
-    }]
-
+    contents = []
     for loop_count, absentee in enumerate(absentees):
         contents.append({
-            "type": "box",
-            "layout": "horizontal",
-            "position": "absolute",
-            "offsetStart": str(20 * loop_count + 4) + "px",
-            "contents": [
-                {
                     "type": "image",
+            "flex": 0,
                     "url": absentee["pictureUrl"],
                     "size": "18px",
-
-                }, {
-                    "type": "text",
-                    "text": absentee["displayName"],
-                    "size": "14px",
-                    "color": MIDNIGHT_BLUE + "00"
-                },
-            ]
+            "margin": "4px"
         })
 
     box = {
         "type": "box",
         "layout": "horizontal",
         "contents": contents
-
     }
     return box
 
