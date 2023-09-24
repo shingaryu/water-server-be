@@ -1,15 +1,18 @@
 import os
+import random
 
-from linebot.models import FlexSendMessage, TextSendMessage
-
+from flask import url_for
+from linebot.models import FlexSendMessage, TextSendMessage, ImageSendMessage
 from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
 from common.get_logger import get_logger
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
     insert_entry, delete_entry
+from set_webhook_url import PUBLIC_URL_ENV_KEY
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
 from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
+public_url = os.environ.get(PUBLIC_URL_ENV_KEY)
 
 N_RECENT_EVENTS = 5
 
@@ -84,5 +87,31 @@ def entry_with_option(event_id, option_id, user):
     else:
         result = insert_entry(document_data)
         message = TextSendMessage(text=f'投票しました。')
+
+    return message
+
+def album_message():
+    logger.info('album_message')
+
+    # サンプル画像での例。staticフォルダ内にファイルを置くことで外部に公開できる。
+    # ここではalbumフォルダ内に画像ファイルを対応するサムネイルとセットで置き、ランダムに一つ選んでいる
+    # Todo: フォルダ内の全ファイル名を取得し、ランダムに一つ選ぶ。このとき、元画像と_thumbを末尾に持つファイルをセットで取得する。
+    sample_photo_sets = [
+        {
+            "original": "IMG_0691.JPG",
+            "thumbnail": "IMG_0691_thumb.JPG"
+        },
+        {
+            "original": "IMG_0734.JPG",
+            "thumbnail": "IMG_0734_thumb.JPG"
+        }
+    ]
+
+    random_photo_set = random.choice(sample_photo_sets)
+
+    message = ImageSendMessage(
+        original_content_url=public_url + url_for('static', filename=f'album/{random_photo_set.get("original")}'),
+        preview_image_url=public_url + url_for('static', filename=f'album/{random_photo_set.get("thumbnail")}')
+    )
 
     return message
