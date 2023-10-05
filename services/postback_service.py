@@ -1,9 +1,11 @@
 import os
 
-from linebot.models import FlexSendMessage, TextSendMessage
+from linebot.models import FlexSendMessage, TextSendMessage, CarouselTemplate, CarouselColumn, URIAction, \
+    TemplateSendMessage
 
 from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
 from common.get_logger import get_logger
+from repositories.youtube_repository import get_my_recent_videos
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
     insert_entry, delete_entry
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
@@ -84,5 +86,26 @@ def entry_with_option(event_id, option_id, user):
     else:
         result = insert_entry(document_data)
         message = TextSendMessage(text=f'投票しました。')
+
+    return message
+
+def recent_videos():
+    videos = get_my_recent_videos()[:5]
+
+    template = CarouselTemplate(
+        columns=[
+            CarouselColumn(
+                thumbnail_image_url=video.get("snippet").get("thumbnails").get("high").get("url"),
+                title=video.get("snippet").get("title")[:40], # 最大40文字(Messaging API制限)
+                text=video.get("snippet").get("description")[:60], # 最大60文字(Messaging API制限)
+                default_action=URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}"),
+                actions=[
+                    URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}")
+                ]
+            ) for video in videos
+        ]
+    )
+
+    message = TemplateSendMessage(alt_text="動画一覧", template=template)
 
     return message
