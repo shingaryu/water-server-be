@@ -1,5 +1,4 @@
 import os
-import json
 import traceback
 
 from bson import ObjectId
@@ -21,7 +20,6 @@ from linebot.models import (
 from linebot.exceptions import (
     LineBotApiError, InvalidSignatureError
 )
-from common import utils
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 from urllib.parse import parse_qs, urlparse

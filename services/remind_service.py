@@ -1,8 +1,6 @@
 import os
 
-from linebot.exceptions import LineBotApiError
 from linebot.models import TextSendMessage
-from pymongo.errors import PyMongoError
 
 from common.get_logger import get_logger
 from repositories.mongo_repository import find_recent_events
