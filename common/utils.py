@@ -21,7 +21,8 @@ def create_response(status_code, body):
     response = {
         'statusCode': status_code,
         'headers': {"Access-Control-Allow-Origin": "*"},
-        'body': body
+        'body': body,
+        'isBase64Encoded': False
     }
     return response
 

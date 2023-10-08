@@ -48,7 +48,6 @@ def remind_closest_event(line_bot_api):
 
     # 直近のイベント時刻までの時間がREMIND_SOONER_THAN_HOURS時間以内且つリマインド済みでない場合にメッセージと投票状況を送信
     if is_over_n_hours(delta_time, REMIND_SOONER_THAN_HOURS, 0, 0) and not isRemindedFlag:
-        try:
             # (a)メッセージ送信 -> (b)MongoDBへの保存 の順番だと、(b)だけ失敗する状況でメッセージが送られ続けてしまうので、(b) -> (a)の順番にしておく
             # イベントにリマインド済みフラグを設定
             logger.debug('イベントにリマインド済みフラグを設定...')
@@ -60,7 +59,3 @@ def remind_closest_event(line_bot_api):
             messages = [text_message, message]
             line_bot_api.broadcast(messages=messages)
             logger.info('メッセージを送信しました')
-        except PyMongoError as e:
-            logger.error("DBへの保存に失敗しました:", e)
-        except LineBotApiError as e:
-            logger.error('メッセージの送信に失敗しました:', e)

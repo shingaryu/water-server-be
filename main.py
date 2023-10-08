@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -56,27 +57,32 @@ def request_handler():
     body = request.get_data(as_text=True)
     logger.info("Request body: " + body)
 
-    error_json = utils.create_error_response('Error')
-    error_json['isBase64Encoded'] = False
-
     try:
         handler.handle(body, signature)
     except LineBotApiError as e:
         logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
         for m in e.error.details:
             logger.error('  %s: %s' % (m.property, m.message))
-        return error_json
+        traceback.print_exc()
+        return utils.create_error_response('Error')
     except InvalidSignatureError as e:
         logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
-        return error_json
+        traceback.print_exc()
+        return utils.create_error_response('Error')
     except Exception as e:
-        logger.error(f'Got internal exception: {e.message}')
-        return error_json
+        logger.error(f'Got internal exception: {e}')
+        traceback.print_exc()
+        return utils.create_error_response('Error')
     else:
-        ok_json = utils.create_success_response(
-            json.dumps('Success'))
-        ok_json['isBase64Encoded'] = False
+        ok_json = utils.create_success_response(json.dumps('Success'))
         return ok_json
+
+def reply_to_user_on_error(reply_token):
+    logger.debug("固定のエラーメッセージをユーザーに送信します…")
+    try:
+        line_bot_api.reply_message(reply_token, TextSendMessage(text='サーバーエラーにより、うまく処理できませんでした。ごめんね！！'))
+    except Exception:  # 他の例外発生時の使用を想定しているため、本関数内での例外は無視
+        logger.warning('エラーメッセージの送信に失敗しました。元の処理を続行します…')
 
 # オウム返し。現状は死活確認用
 @handler.add(MessageEvent, message=TextMessage)
@@ -93,10 +99,8 @@ def postback(line_event):
         query_params = parse_qs(parsed_url.query)
         event_name = parsed_url.path.strip("/")
     except Exception as e:
-        logger.error(f'postback dataのparseに失敗しました。{line_event.postback.data}')
-        line_bot_api.reply_message(
-            line_event.reply_token,
-            TextSendMessage(text='サーバーエラーにより、うまく処理できませんでした。ごめんね！！'))
+        logger.error(f'postbackデータのparseに失敗しました。{line_event.postback.data}')
+        reply_to_user_on_error(line_event.reply_token)
         raise e
 
     try:
@@ -125,9 +129,7 @@ def postback(line_event):
                 TextSendMessage(text='まだ実装してないよ。ごめんね！！'))
     except Exception as e:
         logger.error(f'postbackイベントの処理に失敗しました。event: {event_name}, params: {query_params}')
-        line_bot_api.reply_message(
-            line_event.reply_token,
-            TextSendMessage(text='サーバーエラーにより、うまく処理できませんでした。ごめんね！！'))
+        reply_to_user_on_error(line_event.reply_token)
         raise e
 
 if __name__ == '__main__':
