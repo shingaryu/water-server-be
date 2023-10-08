@@ -53,29 +53,24 @@ def hello_world():
 @app.route("/callback", methods=['POST'])
 def request_handler():
     signature = request.headers['X-Line-Signature']
-
     body = request.get_data(as_text=True)
     logger.info("Request body: " + body)
 
     try:
         handler.handle(body, signature)
+    except InvalidSignatureError as e:
+        logger.error('Signature invalid. You are using wrong channel secret or this is unauthorized request: %s\n' % e.message)
+        traceback.print_exc()
     except LineBotApiError as e:
         logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
         for m in e.error.details:
             logger.error('  %s: %s' % (m.property, m.message))
         traceback.print_exc()
-        return utils.create_error_response('Error')
-    except InvalidSignatureError as e:
-        logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
-        traceback.print_exc()
-        return utils.create_error_response('Error')
     except Exception as e:
         logger.error(f'Got internal exception: {e}')
         traceback.print_exc()
-        return utils.create_error_response('Error')
-    else:
-        ok_json = utils.create_success_response(json.dumps('Success'))
-        return ok_json
+
+    return 'OK'
 
 def reply_to_user_on_error(reply_token):
     logger.debug("固定のエラーメッセージをユーザーに送信します…")
