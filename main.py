@@ -1,16 +1,15 @@
+import os
+import json
+
 from bson import ObjectId
 from dotenv import load_dotenv
-from pymongo.errors import PyMongoError
-
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
     show_recent_event_message
+from services.remind_service import REMIND_INTERVAL_MIN, REMIND_SOONER_THAN_HOURS, remind_closest_event
 
 load_dotenv()
-
-import os
-import json
 
 from flask import Flask, request
 from linebot import WebhookHandler
@@ -25,81 +24,26 @@ from common import utils
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 from urllib.parse import parse_qs, urlparse
-
-from repositories.mongo_repository import find_recent_events
-from repositories.mongo_repository import update_event
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime, timedelta
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 app = Flask(__name__)
-
-scheduler = BackgroundScheduler(daemon=True)
-
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
-REMIND_INTERVAL_MIN = 60
-REMIND_SOONER_THAN_HOURS = 24
-
-#指定した時間差time_differenceがh時間m分s秒以内か判断するプログラム
-def is_over_n_hours(time_difference, h, m, s):
-    time_hms = timedelta(hours=h, minutes=m, seconds=s)
-    return time_difference <= time_hms
-
-#REMIND_INTERVAL_MIN分ごとに実行するプログラムの中身
-def remind_closest_event():
-    logger.info(f'{REMIND_INTERVAL_MIN}分ごとに実行されるプログラム')
-
-    #直近のイベントメッセージを取得
-    message = show_recent_event_message()
-    #直近のイベントの時刻情報を取得し、現在時刻との時間差を求める
-    results = find_recent_events(1)
-    if len(results) == 0:
-        logger.info('開催予定のイベントはありません。')
-        return
-    
-    recent_time = results[0]["startTime"]
-    current_time = datetime.now()
-    delta_time = recent_time - current_time
-    logger.debug(f'現在時刻: {current_time}')
-    logger.debug(f'イベント時刻: {recent_time}')
-    logger.debug(f'イベント時刻まであと: {delta_time}')
-
-    #直近のイベントのリマインド済みフラグ情報を取得
-    isRemindedFlag = results[0].get('isReminded', False)
-    logger.debug(f'リマインド済み: {isRemindedFlag}')
-
-    #直近のイベント時刻までの時間がREMIND_SOONER_THAN_HOURS時間以内且つリマインド済みでない場合にメッセージと投票状況を送信
-    if is_over_n_hours(delta_time,REMIND_SOONER_THAN_HOURS,0,0) and not isRemindedFlag:
-        try:
-            #(a)メッセージ送信 -> (b)MongoDBへの保存 の順番だと、(b)だけ失敗する状況でメッセージが送られ続けてしまうので、(b) -> (a)の順番にしておく
-            #イベントにリマインド済みフラグを設定
-            logger.debug('イベントにリマインド済みフラグを設定...')
-            oid = results[0]['_id']
-            field_to_update = {'isReminded': True}
-            update_event(oid, field_to_update)
-
-            text_message = TextSendMessage(text='【自動配信】次回の開催まであと1日です。参加状況を連絡します。投票がまだの方は投票してください。')
-            messages = [text_message, message]
-            line_bot_api.broadcast(messages = messages)
-            logger.info('メッセージを送信しました')
-        except PyMongoError as e:
-            logger.error("DBへの保存に失敗しました:", e)
-        except LineBotApiError as e:
-            logger.error('メッセージの送信に失敗しました:', e)
-
-#REMIND_INTERVAL_MIN分ごとにremind_closest_eventを実行するよう指示
-def start_scheduler():
-    logger.info('schedulerジョブを設定します...')
-    logger.debug(f'REMIND_INTERVAL_MIN: {REMIND_INTERVAL_MIN}')
-    logger.debug(f'REMIND_SOONER_THAN_HOURS: {REMIND_SOONER_THAN_HOURS}')
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(remind_closest_event, 'interval', minutes=REMIND_INTERVAL_MIN)
-    scheduler.start()
-
-start_scheduler()
+# REMIND_INTERVAL_MIN分ごとにremind_closest_eventを実行するよう指示
+scheduler = BackgroundScheduler(daemon=True)  # background thread
+logger.info('schedulerジョブを設定します...')
+logger.debug(f'REMIND_INTERVAL_MIN: {REMIND_INTERVAL_MIN}')
+logger.debug(f'REMIND_SOONER_THAN_HOURS: {REMIND_SOONER_THAN_HOURS}')
+scheduler.add_job(
+    func=remind_closest_event,
+    trigger='interval',
+    args=[line_bot_api],
+    minutes=REMIND_INTERVAL_MIN
+)
+scheduler.start()
 
 @app.route("/")
 def hello_world():
