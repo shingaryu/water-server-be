@@ -69,9 +69,9 @@ def request_handler():
     except InvalidSignatureError as e:
         logger.error('Got exception from LINE Messaging API: %s\n' % e.message)
         return error_json
-    # except Exception as e:
-    #     logger.error(f'Got internal exception: {e.message}')
-
+    except Exception as e:
+        logger.error(f'Got internal exception: {e.message}')
+        return error_json
     else:
         ok_json = utils.create_success_response(
             json.dumps('Success'))
@@ -92,6 +92,14 @@ def postback(line_event):
         parsed_url = urlparse(line_event.postback.data)
         query_params = parse_qs(parsed_url.query)
         event_name = parsed_url.path.strip("/")
+    except Exception as e:
+        logger.error(f'postback dataのparseに失敗しました。{line_event.postback.data}')
+        line_bot_api.reply_message(
+            line_event.reply_token,
+            TextSendMessage(text='サーバーエラーにより、うまく処理できませんでした。ごめんね！！'))
+        raise e
+
+    try:
         if (event_name == SHOW_NEXT_EVENT):
             message = show_recent_event_message()
             line_bot_api.reply_message(line_event.reply_token, message)
@@ -116,9 +124,10 @@ def postback(line_event):
                 line_event.reply_token,
                 TextSendMessage(text='まだ実装してないよ。ごめんね！！'))
     except Exception as e:
+        logger.error(f'postbackイベントの処理に失敗しました。event: {event_name}, params: {query_params}')
         line_bot_api.reply_message(
             line_event.reply_token,
-            TextSendMessage(text=f'サーバー内部でエラーが発生しました。\n{str(e)}'))
+            TextSendMessage(text='サーバーエラーにより、うまく処理できませんでした。ごめんね！！'))
         raise e
 
 if __name__ == '__main__':
