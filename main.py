@@ -4,6 +4,7 @@ from pymongo.errors import PyMongoError
 
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON
+from repositories.youtube_repository import refresh_token_if_expired
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
     show_recent_event_message, recent_videos
 
@@ -42,6 +43,7 @@ handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
 REMIND_INTERVAL_MIN = 60
 REMIND_SOONER_THAN_HOURS = 24
+REFRESH_TOKEN_INTERVAL_MIN = 60 * 12
 
 #指定した時間差time_differenceがh時間m分s秒以内か判断するプログラム
 def is_over_n_hours(time_difference, h, m, s):
@@ -90,6 +92,11 @@ def remind_closest_event():
         except LineBotApiError as e:
             logger.error('メッセージの送信に失敗しました:', e)
 
+# Todo: このバックグラウンドジョブが本当に必要かどうか調査
+def refresh_googleapi_token():
+    logger.info("Google API トークンの有効期限を確認しています…")
+    refresh_token_if_expired()
+
 #REMIND_INTERVAL_MIN分ごとにremind_closest_eventを実行するよう指示
 def start_scheduler():
     logger.info('schedulerジョブを設定します...')
@@ -97,6 +104,7 @@ def start_scheduler():
     logger.debug(f'REMIND_SOONER_THAN_HOURS: {REMIND_SOONER_THAN_HOURS}')
     scheduler = BackgroundScheduler()
     scheduler.add_job(remind_closest_event, 'interval', minutes=REMIND_INTERVAL_MIN)
+    scheduler.add_job(refresh_googleapi_token, 'interval', minutes=REFRESH_TOKEN_INTERVAL_MIN)
     scheduler.start()
 
 start_scheduler()
