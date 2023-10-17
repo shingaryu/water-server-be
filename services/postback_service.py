@@ -96,8 +96,8 @@ def recent_videos():
         columns=[
             CarouselColumn(
                 thumbnail_image_url=video.get("snippet").get("thumbnails").get("high").get("url"),
-                title=video.get("snippet").get("title")[:40], # 最大40文字(Messaging API制限)
-                text=video.get("snippet").get("description")[:60], # 最大60文字(Messaging API制限)
+                title=video.get("snippet").get("title")[:40] or " ", # 最大40文字(Messaging API制限)、must be non-empty text
+                text=video.get("snippet").get("description")[:60] or " ", # 最大60文字(Messaging API制限)、must be non-empty text
                 default_action=URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}"),
                 actions=[
                     URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}")
