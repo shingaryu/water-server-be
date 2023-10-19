@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, AKIO_BUTTON
+from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS
 
 load_dotenv()
 
@@ -19,7 +19,7 @@ POSTBACK_DATA = [
     f'{SHOW_EVENTS}',
     f'richmenu/?area=2',
     f'richmenu/?area=3',
-    f'richmenu/?area=4',
+    f'{SHOW_VIDEOS}',
     f'{AKIO_BUTTON}'
 ]
 
@@ -28,7 +28,7 @@ DISPLAY_TEXTS = [
     '開催日一覧',
     'YWxidW0=',
     'bWVtYmVyIGxpc3Q=',
-    '新機能募集中!',
+    'ムービー',
     'はやしあきお',
 ]
 

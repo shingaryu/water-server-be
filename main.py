@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 from pyngrok import ngrok
 
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
-    ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON
+    ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS
+from repositories.youtube_repository import refresh_token_if_expired
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
-    show_recent_event_message
+    show_recent_event_message, recent_videos
 from services.remind_service import REMIND_INTERVAL_MIN, REMIND_SOONER_THAN_HOURS, remind_closest_event
 from set_webhook_url import set_webhook_url
 
@@ -35,6 +36,13 @@ app = Flask(__name__)
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
+REFRESH_TOKEN_INTERVAL_MIN = 60 * 12
+
+# Todo: このバックグラウンドジョブが本当に必要かどうか調査
+def refresh_googleapi_token():
+    logger.info("Google API トークンの有効期限を確認しています…")
+    refresh_token_if_expired()
+
 # REMIND_INTERVAL_MIN分ごとにremind_closest_eventを実行するよう指示
 scheduler = BackgroundScheduler(daemon=True)  # background thread
 logger.info('schedulerジョブを設定します...')
@@ -45,6 +53,11 @@ scheduler.add_job(
     trigger='interval',
     args=[line_bot_api],
     minutes=REMIND_INTERVAL_MIN
+)
+scheduler.add_job(
+    func=refresh_googleapi_token,
+    trigger='interval',
+    minutes=REFRESH_TOKEN_INTERVAL_MIN
 )
 scheduler.start()
 
@@ -116,6 +129,9 @@ def postback(line_event):
             option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)[0]
             profile = line_bot_api.get_profile(line_event.source.user_id)
             message = entry_with_option(event_id, option_id, profile)
+            line_bot_api.reply_message(line_event.reply_token, message)
+        elif (event_name == SHOW_VIDEOS):
+            message = recent_videos()
             line_bot_api.reply_message(line_event.reply_token, message)
         elif (event_name == AKIO_BUTTON):
             message = TextSendMessage(text='こんにちは、林亮夫です。')
