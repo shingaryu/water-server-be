@@ -1,6 +1,5 @@
 import logging
 import sys
-# import os
 
 FORMAT = '%(asctime)s [%(name)s][%(levelname)s] - %(message)s'
 logging.basicConfig(format=FORMAT)
