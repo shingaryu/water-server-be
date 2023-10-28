@@ -90,7 +90,7 @@ def entry_with_option(event_id, option_id, user):
     return message
 
 def recent_videos():
-    videos = get_my_recent_videos()[:5]
+    videos = get_my_recent_videos()[:10]
 
     template = CarouselTemplate(
         columns=[
