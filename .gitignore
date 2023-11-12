@@ -1,6 +1,8 @@
 .env
 .idea/
 __pycache__/
-credentials.json
+credentials_installed_flow.json
 token.json
 all_entries.xlsx
+credentials_web_flow.json
+playground_response.json
