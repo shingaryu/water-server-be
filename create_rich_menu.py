@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS
+from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS
 
 load_dotenv()
 
@@ -17,7 +17,7 @@ RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
 POSTBACK_DATA = [
     f'{SHOW_NEXT_EVENT}',
     f'{SHOW_EVENTS}',
-    f'richmenu/?area=2',
+    f'{SHOW_MEMBERS}',
     f'richmenu/?area=3',
     f'{SHOW_VIDEOS}',
     f'{AKIO_BUTTON}'
@@ -26,7 +26,7 @@ POSTBACK_DATA = [
 DISPLAY_TEXTS = [
     '参加登録',
     '開催日一覧',
-    'YWxidW0=',
+    'メンバリスト',
     'bWVtYmVyIGxpc3Q=',
     'ムービー',
     'はやしあきお',
