@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-
+from bson import ObjectId
 from dotenv import load_dotenv
 import pymongo
 from pymongo import MongoClient
@@ -13,7 +13,7 @@ logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 logger.debug(f'MongoDB Connection to {os.environ.get("CONNECTION_STRING")}...')
 client = MongoClient(os.environ.get("CONNECTION_STRING"), tlsAllowInvalidCertificates=True)
 
-db = client["waterServerDbDev"]
+db = client[os.environ.get("DB_NAME")]
 # logger.info('Successfully connected to database')
 
 events_collection = db["Events"]
@@ -52,6 +52,24 @@ def find_all_entries():
     logger.info('Find all entries...')
     results = list(entries_collection.find())
 
+    return results
+
+# This function returns all users in a specific event.
+# The returned dict contains only one same user for the event.
+# (e.g. There could be multiple entries for a user. like they updated their attendance.
+# This function returns only one user for them.)
+def find_all_members_in_the_event(event_id: ObjectId) -> dict:
+    id: str = str(event_id)
+    #For test TODO: delete here
+    # id = "64616a5af743fbf3cfa47cc8" #an event in Nov.
+    
+    entries: list = list(entries_collection.find({"eventId": id}))
+    results: dict = dict()
+    for entry in entries:
+        key: str = entry["user"]["userId"]
+        value = entry["user"]
+        results[key] = value
+        
     return results
 
 def find_entry(event_id, user_id):

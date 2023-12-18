@@ -23,15 +23,16 @@ else:
 
 
 def refresh_token_if_expired():
-    if not creds.expired:
-        return
-    if not creds.refresh_token:
-        return
-    logger.debug("token expired. refreshing...")
-    creds.refresh(Request())
-    with open('token.json', 'w') as token:
-        token.write(creds.to_json())
-    logger.debug("token refresh completed")
+    # if not creds.expired:
+    #     return
+    # if not creds.refresh_token:
+    #     returns
+    # logger.debug("token expired. refreshing...")
+    # creds.refresh(Request())
+    # with open('token.json', 'w') as token:
+    #     token.write(creds.to_json())
+    # logger.debug("token refresh completed")
+    pass
 
 
 refresh_token_if_expired()

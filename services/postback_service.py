@@ -1,5 +1,5 @@
 import os
-
+from bson import ObjectId
 from linebot.models import FlexSendMessage, TextSendMessage, CarouselTemplate, CarouselColumn, URIAction, \
     TemplateSendMessage
 
@@ -7,9 +7,10 @@ from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
 from common.get_logger import get_logger
 from repositories.youtube_repository import get_my_recent_videos
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
-    insert_entry, delete_entry
+    insert_entry, delete_entry, find_all_members_in_the_event
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
 from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
+from templates.show_members_template import member_contents_demo
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
@@ -21,6 +22,121 @@ def show_recent_event_message():
         return TextSendMessage(text='直近の開催予定がありません。')
     else:
         return select_option_to_entry_message(events[0]["_id"])
+
+def show_members_attending_the_recent_event_in_text_message() -> TextSendMessage:
+    #Find the next event
+    events: list = find_recent_events(1)
+    if len(events) != 1:
+        logger.error("Couldn't find the next event!")
+        return TextSendMessage("Couldn't find the next event!")
+    event_id: ObjectId = events[0]["_id"]
+
+    #Find members who are going to the next event
+    users: dict = find_all_members_in_the_event(event_id)
+
+    #Generate a flex message
+    text:str = str()
+    i: int = 0
+    for user in users.values():
+        i += 1
+        text += user["displayName"]
+        if (i != len(users)):
+            text += "\n"
+
+    return TextSendMessage(text=text)
+
+def show_members_attending_the_recent_event_in_flex_message() ->FlexSendMessage:
+    #Find the next event
+    events: list = find_recent_events(1)
+    if len(events) != 1:
+        logger.error("Couldn't find the next event!")
+        return TextSendMessage("Couldn't find the next event!")
+    event_id: ObjectId = events[0]["_id"]
+
+    #Find members who are going to the next event
+    users: dict = find_all_members_in_the_event(event_id)
+
+    #Generate a flex send message
+    users_flex_contents = []
+    for user in users.values():
+        name: str = user["displayName"]
+        image_url: str = user["pictureUrl"]
+        user_flex_contents: dict = member_contents(name, image_url)
+        users_flex_contents.append(user_flex_contents)
+
+    contents = {
+        "type": "carousel",
+        "contents": users_flex_contents
+    }
+
+    flex_message = FlexSendMessage(
+        alt_text='メンバ一覧',
+        contents=contents
+    )
+    return flex_message
+
+def show_members_message_demo() -> list[FlexSendMessage]:
+
+    #This is for all events.
+    events: list = find_all_events()
+    event_ids: set = {ObjectId}
+    for event in events:
+        event_ids.add(event["_id"])
+
+    users = {}
+    for event_id in list(event_ids):
+        users = users | find_all_members_in_the_event(event_id)
+
+    #Sort by name... Tried.. but seems not sorted by name. why??
+    sorted_users = dict(sorted(users.items(), key=lambda item: item[1]["displayName"]))
+
+    #Generate flex send messages
+    flex_messages = []   
+    users_flex_contents = []
+    count: int = 0
+    for user in sorted_users.values():
+        count += 1
+        name: str = user["displayName"]
+        image_url: str = user["pictureUrl"]
+        user_flex_contents: dict = member_contents_demo(name, image_url)
+        users_flex_contents.append(user_flex_contents)
+
+        #One carousel message type can have up to 12 items. If there are more users, need to break a message into multiple messages.
+        if (count % 12 == 0) or (count == len(users)):
+            contents = {
+                "type": "carousel",
+                "contents": users_flex_contents
+            }
+
+            flex_message = FlexSendMessage(
+                alt_text='メンバ一覧',
+                contents=contents
+            )
+
+            flex_messages.append(flex_message)
+            users_flex_contents.clear()
+    
+    return flex_messages
+
+def show_members_message() -> FlexSendMessage:
+    #This is for all events.
+    events: list = find_all_events()
+    event_ids: set = {ObjectId}
+    for event in events:
+        event_ids.add(event["_id"])
+
+    users = {}
+    for event_id in list(event_ids):
+        users = users | find_all_members_in_the_event(event_id)
+
+    #Sort by name... Tried.. but seems not sorted by name. why??
+    sorted_users = dict(sorted(users.items(), key=lambda item: item[1]["displayName"]))
+
+    #Generate flex send messages
+    flex_messages = []   
+    users_flex_contents = []
+    count: int = 0
+    return FlexSendMessage
 
 def select_entry_events_message():
     event_contents = []
