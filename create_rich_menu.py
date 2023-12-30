@@ -26,7 +26,7 @@ POSTBACK_DATA = [
 DISPLAY_TEXTS = [
     '参加登録',
     '開催日一覧',
-    '参加メンバ一覧',
+    'メンバリスト',
     'bWVtYmVyIGxpc3Q=',
     'ムービー',
     'はやしあきお',

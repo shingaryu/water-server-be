@@ -9,8 +9,8 @@ from pyngrok import ngrok
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS
 from repositories.youtube_repository import refresh_token_if_expired
-from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, show_members_message_demo,\
-    show_recent_event_message, recent_videos
+from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, show_members_message_demo, show_members_message,\
+    show_recent_event_message, recent_videos, show_members_attending_the_recent_event_in_text_message
 from services.remind_service import REMIND_INTERVAL_MIN, REMIND_SOONER_THAN_HOURS, remind_closest_event
 from set_webhook_url import set_webhook_url
 
@@ -122,7 +122,7 @@ def postback(line_event):
             line_bot_api.reply_message(line_event.reply_token, message)
         elif (event_name == SHOW_MEMBERS):
             #TODO: Return user list here and check the number of users, if it's grater than 12. Send the flex message multiple times.
-            flex_messages:list = show_members_message_demo()
+            flex_messages:list = show_members_message()
             # for message in flex_messages:
             line_bot_api.reply_message(line_event.reply_token, flex_messages)
         elif (event_name == SELECT_EVENT_TO_ENTRY):
