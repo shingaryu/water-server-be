@@ -59,18 +59,18 @@ def show_members_message() -> list[FlexSendMessage]:
         #It can only show 14 members in a bubble with the current designe. Need to separate bubbles if the number of the total members exceeds 14 members.
         if member_list_num == 1:
             if (count == len(users)):
-                contents = member_list_bubble("メンバリスト", users_flex_contents)
+                contents = member_list_bubble("メンバーリスト", users_flex_contents)
                 flex_message = FlexSendMessage(
-                    alt_text='メンバ一覧',
+                    alt_text='メンバー一覧',
                     contents=contents
                 )
                 flex_messages.append(flex_message)
         else:
             if (count % max_count_in_a_bubble == 0) or (count == len(users)):
                 member_list_count += 1
-                contents = member_list_bubble("メンバリスト (%s)" % (str(member_list_count) + "/" + str(member_list_num)), users_flex_contents)
+                contents = member_list_bubble("メンバーリスト (%s)" % (str(member_list_count) + "/" + str(member_list_num)), users_flex_contents)
                 flex_message = FlexSendMessage(
-                    alt_text='メンバ一覧',
+                    alt_text='メンバー一覧',
                     contents=contents
                 )
                 flex_messages.append(flex_message)
