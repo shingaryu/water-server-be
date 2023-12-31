@@ -23,7 +23,8 @@ def member_contents(name: str, image_url: str) ->dict:
             "offsetStart": "md",
             "position": "relative",
             "gravity": "center",
-            "align": "start"
+            "align": "start",
+            "weight": "bold"
         }
         ],
         "position": "relative",
@@ -67,20 +68,22 @@ def member_list_bubble(header_title: str, member_contents: list) -> dict:
               "offsetTop": "0px",
               "offsetStart": "0px",
               "aspectRatio": "1:2",
-              "size": "100%"
+              "size": "full",
+              "flex": 0,
+              "position": "absolute"
             },
             {
               "type": "box",
               "layout": "vertical",
               "contents": member_contents,
-              "position": "absolute",
+              "position": "relative",
               "width": "100%",
               "height": "100%",
               "offsetBottom": "none",
               "offsetTop": "none"
             }
           ],
-          "paddingAll": "none",
+          "paddingAll": "sm",
           "flex": 0,
           "position": "relative",
           "height": "100%"

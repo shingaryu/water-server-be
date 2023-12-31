@@ -43,7 +43,7 @@ def show_members_message() -> list[FlexSendMessage]:
     flex_messages = []   
     users_flex_contents = []
     count: int = 0
-    max_count_in_a_bubble: int = 14 #When the size of images is xxs, this is 14. When the size of images is xs, this is 10.
+    max_count_in_a_bubble: int = 30 #When the size of images is xxs, this is 14. When the size of images is xs, this is 10.
     member_list_num: int = len(sorted_users) // max_count_in_a_bubble
     if len(sorted_users) % max_count_in_a_bubble != 0:
         member_list_num += 1
