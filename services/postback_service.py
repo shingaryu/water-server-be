@@ -7,10 +7,11 @@ from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
 from common.get_logger import get_logger
 from repositories.youtube_repository import get_my_recent_videos
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
-    insert_entry, delete_entry, find_all_members_in_the_event
+    insert_entry, delete_entry, generate_my_users_dict, MyUser
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
 from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
 from templates.show_members_template import member_contents, member_list_bubble
+from create_rich_menu import DISPLAY_TEXTS
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
@@ -23,52 +24,46 @@ def show_recent_event_message():
     else:
         return select_option_to_entry_message(events[0]["_id"])
 
-def show_members_message() -> list[FlexSendMessage]:
-    #This is for all events.
-    events: list = find_all_events()
-    event_ids: set = {ObjectId}
-    for event in events:
-        event_ids.add(event["_id"])
-
-    users = {}
-    for event_id in list(event_ids):
-        users = users | find_all_members_in_the_event(event_id)
+def show_members_message() -> list[FlexSendMessage]:       
+    my_users: dict[str, MyUser] = generate_my_users_dict(find_all_events())
 
     #TODO Calculate the appearance (Appearance/The total events)
     #TODO Check if users are coming to the next event.　(Y/N)
     #TODO sort the user list by attendance to the next event. The absentees come first.
-    sorted_users = dict(sorted(users.items(), key=lambda item: item[1]["displayName"]))
+    
+    sorted_my_users = dict(sorted(my_users.items(), key=lambda item: (item[1].firstAttendanceDateTime, item[1].user["displayName"])))
 
     #Generate flex send messages
     flex_messages = []   
     users_flex_contents = []
     count: int = 0
-    max_count_in_a_bubble: int = 30 #When the size of images is xxs, this is 14. When the size of images is xs, this is 10.
-    member_list_num: int = len(sorted_users) // max_count_in_a_bubble
-    if len(sorted_users) % max_count_in_a_bubble != 0:
+    # Find out how many lists we need before generating flex messages.
+    max_count_in_a_bubble: int = 30 #This is just a random number. you can change whatever you want.
+    member_list_num: int = len(sorted_my_users) // max_count_in_a_bubble
+    if len(sorted_my_users) % max_count_in_a_bubble != 0:
         member_list_num += 1
     member_list_count: int = 0
     
-    for user in sorted_users.values():
+    for my_user in sorted_my_users.values():
         count += 1
+        user: dict = my_user.user
         name: str = user["displayName"]
         image_url: str = user["pictureUrl"]
         user_flex_contents: dict = member_contents(name, image_url)
         users_flex_contents.append(user_flex_contents)
 
-        #It can only show 14 members in a bubble with the current designe. Need to separate bubbles if the number of the total members exceeds 14 members.
         if member_list_num == 1:
-            if (count == len(users)):
-                contents = member_list_bubble("メンバーリスト", users_flex_contents)
+            if (count == len(sorted_my_users)):
+                contents = member_list_bubble(DISPLAY_TEXTS[2], users_flex_contents)
                 flex_message = FlexSendMessage(
                     alt_text='メンバー一覧',
                     contents=contents
                 )
                 flex_messages.append(flex_message)
         else:
-            if (count % max_count_in_a_bubble == 0) or (count == len(users)):
+            if (count % max_count_in_a_bubble == 0) or (count == len(sorted_my_users)):
                 member_list_count += 1
-                contents = member_list_bubble("メンバーリスト (%s)" % (str(member_list_count) + "/" + str(member_list_num)), users_flex_contents)
+                contents = member_list_bubble(DISPLAY_TEXTS[2] +" (%s)" % (str(member_list_count) + "/" + str(member_list_num)), users_flex_contents)
                 flex_message = FlexSendMessage(
                     alt_text='メンバー一覧',
                     contents=contents

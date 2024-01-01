@@ -70,6 +70,36 @@ def find_all_members_in_the_event(event_id: ObjectId) -> dict:
         
     return results
 
+# MyUser stores user-related necessary information from MongoDB
+class MyUser:
+    user: dict  #User object.
+    firstAttendanceDateTime: datetime
+    
+    def __init__(self, user: dict, firstAttendanceDateTime:datetime):
+        self.user = user
+        self.firstAttendanceDateTime:datetime = firstAttendanceDateTime
+
+    def set(self, user: dict, firstAttendanceDateTime:datetime):
+        self.user = user
+        self.firstAttendanceDateTime:datetime = firstAttendanceDateTime
+
+# key: strying class. User's objectID from MongoDB
+# Value: MyUser class.
+def generate_my_users_dict(events: list) -> dict[str, MyUser]:
+    results: dict = dict()
+    for event in events:
+        event_id: ObjectId = event["_id"]
+        entries: list = list(entries_collection.find({"eventId": str(event_id)}))
+        for entry in entries:
+            key: str = entry["user"]["userId"]
+            user: dict = entry["user"]
+            event_datetime: datetime = event["startTime"]
+            #Updates results to set the earliest entry date and time.
+            if (key not in results) or (results[key].firstAttendanceDateTime > event_datetime):
+                results[key] = MyUser(user, event_datetime)            
+    
+    return results
+
 def find_entry(event_id, user_id):
     logger.info(f'Find entry with event_id: {event_id}, user id: {user_id}...')
     entry = entries_collection.find_one({"eventId": event_id, "user.userId": user_id})
