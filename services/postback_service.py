@@ -1,11 +1,11 @@
 import os
 from bson import ObjectId
 from linebot.models import FlexSendMessage, TextSendMessage, CarouselTemplate, CarouselColumn, URIAction, \
-    TemplateSendMessage
+    TemplateSendMessage, QuickReply, QuickReplyButton, PostbackAction
 
-from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT
+from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, SHOW_VIDEOS, SHOW_VIDEOS_PLAYLIST
 from common.get_logger import get_logger
-from repositories.youtube_repository import get_my_recent_videos
+from repositories.youtube_repository import get_my_recent_videos, get_playlist_videos, get_my_playlists
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
     insert_entry, delete_entry, generate_member_info_dict, MemberInfo
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
@@ -142,6 +142,27 @@ def entry_with_option(event_id, option_id, user):
 
     return message
 
+
+def videos_quick_reply_obj():
+    playlists = get_my_playlists()
+    items = [
+        QuickReplyButton(
+            action=PostbackAction(label="全部", data=f"{SHOW_VIDEOS}")
+        )
+    ]
+
+    items.extend([
+            QuickReplyButton(
+            image_url=playlist.get("snippet").get("thumbnails").get("default").get("url"),
+            action=PostbackAction(
+                label=playlist.get("snippet").get("title"),
+                data=f"{SHOW_VIDEOS}/?{SHOW_VIDEOS_PLAYLIST}={playlist.get('id')}"),
+                display_text=playlist.get("snippet").get("title"),
+            ) for playlist in playlists
+    ])
+
+    return QuickReply(items=items)
+
 def recent_videos():
     videos = get_my_recent_videos()[:10]
 
@@ -159,6 +180,27 @@ def recent_videos():
         ]
     )
 
-    message = TemplateSendMessage(alt_text="動画一覧", template=template)
+    message = TemplateSendMessage(alt_text="動画一覧", template=template, quick_reply=videos_quick_reply_obj())
+
+    return message
+
+def playlist_videos_message(playlist_id: str):
+    videos = get_playlist_videos(playlist_id)[:10]
+
+    template = CarouselTemplate(
+        columns=[
+            CarouselColumn(
+                thumbnail_image_url=video.get("snippet").get("thumbnails").get("high").get("url"),
+                title=video.get("snippet").get("title")[:40] or " ", # 最大40文字(Messaging API制限)、must be non-empty text
+                text=video.get("snippet").get("description")[:60] or " ", # 最大60文字(Messaging API制限)、must be non-empty text
+                default_action=URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('snippet').get('resourceId').get('videoId')}"),
+                actions=[
+                    URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('snippet').get('resourceId').get('videoId')}")
+                ]
+            ) for video in videos
+        ]
+    )
+
+    message = TemplateSendMessage(alt_text="動画一覧", template=template, quick_reply=videos_quick_reply_obj())
 
     return message

@@ -7,10 +7,12 @@ from dotenv import load_dotenv
 from pyngrok import ngrok
 
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
-    ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS
+    ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS, \
+    SHOW_VIDEOS_PLAYLIST
 from repositories.youtube_repository import refresh_token_if_expired
-from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, show_members_message,\
-    show_recent_event_message, recent_videos
+from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
+    show_members_message, \
+    show_recent_event_message, recent_videos, playlist_videos_message
 from services.remind_service import REMIND_INTERVAL_MIN, REMIND_SOONER_THAN_HOURS, remind_closest_event
 from set_webhook_url import set_webhook_url
 
@@ -134,7 +136,11 @@ def postback(line_event):
             message = entry_with_option(event_id, option_id, profile)
             line_bot_api.reply_message(line_event.reply_token, message)
         elif (event_name == SHOW_VIDEOS):
-            message = recent_videos()
+            playlist_id = query_params.get(SHOW_VIDEOS_PLAYLIST)[0] if query_params.get(SHOW_VIDEOS_PLAYLIST) else None
+            if playlist_id is not None:
+                message = playlist_videos_message(playlist_id)
+            else:
+                message = recent_videos()
             line_bot_api.reply_message(line_event.reply_token, message)
         elif (event_name == AKIO_BUTTON):
             message = TextSendMessage(text='こんにちは、林亮夫です。')

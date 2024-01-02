@@ -52,3 +52,31 @@ def get_my_recent_videos():
     response = request.execute()
     logger.debug(response)
     return response.get("items")
+
+
+def get_my_playlists():
+    logger.info(f"get my playlists...")
+    refresh_token_if_expired()
+    request = youtube.playlists().list(
+        part=["snippet, contentDetails"],
+        maxResults=50,  # YouTube APIの単一のリクエストで取得できる最大数
+        mine=True,
+    )
+
+    response = request.execute()
+    logger.debug(response)
+    return response.get("items")
+
+
+def get_playlist_videos(playlist_id: str):
+    logger.info(f"get videos in playlist {playlist_id}...")
+    refresh_token_if_expired()
+    request = youtube.playlistItems().list(
+        part="snippet",
+        playlistId=playlist_id,
+        maxResults=50,  # YouTube APIの単一のリクエストで取得できる最大数
+    )
+
+    response = request.execute()
+    logger.debug(response)
+    return response.get("items")
