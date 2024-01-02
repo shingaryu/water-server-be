@@ -1,3 +1,4 @@
+LOGO_BACKGROUND_COLOR = "#F3F2F9"
 
 def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
     contents: dict = {
@@ -41,9 +42,9 @@ def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
     }
     return contents
 
+
 def member_list_bubble(header_title: str, member_contents: list) -> dict:
-    bubble: dict = {}
-    bubble = {
+    bubble: dict = {
         "type": "bubble",
         "size": "mega",
         "header": {
@@ -94,7 +95,8 @@ def member_list_bubble(header_title: str, member_contents: list) -> dict:
           "paddingAll": "sm",
           "flex": 0,
           "position": "relative",
-          "height": "100%"
+          "height": "100%",
+          "backgroundColor": LOGO_BACKGROUND_COLOR
         }
     }
     return bubble
