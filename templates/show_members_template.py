@@ -1,5 +1,5 @@
 
-def member_contents(name: str, image_url: str) ->dict:
+def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
     contents: dict = {
         "type": "box",
         "layout": "horizontal",
@@ -18,13 +18,21 @@ def member_contents(name: str, image_url: str) ->dict:
         {
             "type": "text",
             "text": name,
-            "flex": 0,
             "wrap": True,
             "offsetStart": "md",
             "position": "relative",
             "gravity": "center",
             "align": "start",
             "weight": "bold"
+        },
+        {
+          "type": "text",
+          "text": total_attendance,
+          "flex": 0,
+          "weight": "bold",
+          "gravity": "center",
+          "wrap": True,
+          "offsetEnd": "xs"
         }
         ],
         "position": "relative",

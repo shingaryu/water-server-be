@@ -70,33 +70,47 @@ def find_all_members_in_the_event(event_id: ObjectId) -> dict:
         
     return results
 
-# MyUser stores user-related necessary information from MongoDB
-class MyUser:
-    user: dict  #User object.
+# MemberInfo stores user-related necessary information from MongoDB
+class MemberInfo:
+    displayName: str
+    pictureUrl: str
     firstAttendanceDateTime: datetime
+    totalAttendance: int
     
-    def __init__(self, user: dict, firstAttendanceDateTime:datetime):
-        self.user = user
-        self.firstAttendanceDateTime:datetime = firstAttendanceDateTime
-
-    def set(self, user: dict, firstAttendanceDateTime:datetime):
-        self.user = user
-        self.firstAttendanceDateTime:datetime = firstAttendanceDateTime
+    def __init__(self, displayName: str, pictureUrl: str, firstAttendanceDateTime:datetime = datetime(2099,1,1), totalAttendance: int = 0):
+        self.displayName = displayName
+        self.pictureUrl = pictureUrl
+        self.firstAttendanceDateTime = firstAttendanceDateTime
+        self.totalAttendance = totalAttendance
+        
+    def setTotalAttendance(self, totalAttendance:int) ->None:
+        self.totalAttendance = totalAttendance
+        
+    def setFirstAttendanceDateTime(self, firstAttendanceDateTime: datetime) ->None:
+        self.firstAttendanceDateTime = firstAttendanceDateTime
 
 # key: strying class. User's objectID from MongoDB
-# Value: MyUser class.
-def generate_my_users_dict(events: list) -> dict[str, MyUser]:
+# Value: MemberInfo class.
+def generate_member_info_dict(events: list) -> dict[str, MemberInfo]:
     results: dict = dict()
     for event in events:
         event_id: ObjectId = event["_id"]
         entries: list = list(entries_collection.find({"eventId": str(event_id)}))
         for entry in entries:
             key: str = entry["user"]["userId"]
-            user: dict = entry["user"]
+            display_name: str = entry["user"]["displayName"]
+            picture_url:str = entry["user"]["pictureUrl"]
+            entry_status: int = int(entry["selectedOptionId"])
             event_datetime: datetime = event["startTime"]
-            #Updates results to set the earliest entry date and time.
-            if (key not in results) or (results[key].firstAttendanceDateTime > event_datetime):
-                results[key] = MyUser(user, event_datetime)            
+            
+            if (key not in results):
+                results[key] = MemberInfo(display_name, picture_url)
+                
+            if (results[key].firstAttendanceDateTime > event_datetime):
+                results[key].setFirstAttendanceDateTime(event_datetime)
+            
+            if (entry_status <= 2): #See the definition of entry stats in select_option_to_entry_template.py.
+                results[key].setTotalAttendance(results[key].totalAttendance + 1)
     
     return results
 
