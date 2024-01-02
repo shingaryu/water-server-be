@@ -1,6 +1,6 @@
 LOGO_BACKGROUND_COLOR = "#F3F2F9"
 
-def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
+def member_contents(name: str, image_url: str, total_attendance: str, normalized_attendance: float) ->dict:
     contents: dict = {
         "type": "box",
         "layout": "horizontal",
@@ -28,7 +28,7 @@ def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
                     "layout": "vertical",
                     "height": "5px",
                     "borderColor": "#007AFF",
-                    "width": "100%",
+                    "width": f"{int(normalized_attendance * 100)}%",
                     "backgroundColor": "#BBDBF3",
                     "position": "absolute",
                     "offsetTop": "30px"

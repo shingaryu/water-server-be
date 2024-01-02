@@ -43,13 +43,15 @@ def show_members_message() -> list[FlexSendMessage]:
     if len(sorted_members_info) % max_count_in_a_bubble != 0:
         member_list_num += 1
     member_list_count: int = 0
-    
+
+    max_attendance: int = max([member_info.totalAttendance for member_info in sorted_members_info.values()])
+
     for member_info in sorted_members_info.values():
         count += 1
         name: str = member_info.displayName
         image_url: str = member_info.pictureUrl
         total_attendance: str = str(member_info.totalAttendance)
-        user_flex_contents: dict = member_contents(name, image_url, total_attendance)
+        user_flex_contents: dict = member_contents(name, image_url, total_attendance, float(total_attendance) / max_attendance)
         users_flex_contents.append(user_flex_contents)
 
         if member_list_num == 1:
