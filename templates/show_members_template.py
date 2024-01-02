@@ -1,6 +1,6 @@
 LOGO_BACKGROUND_COLOR = "#F3F2F9"
 
-def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
+def member_contents(name: str, image_url: str, total_attendance: str, normalized_attendance: float) ->dict:
     contents: dict = {
         "type": "box",
         "layout": "horizontal",
@@ -12,33 +12,53 @@ def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
             "position": "relative",
             "aspectMode": "cover",
             "align": "start",
-            "offsetStart": "sm",
             "offsetTop": "sm",
-            "flex": 0
+            "flex": 0,
+            "action": {
+                "type": "uri",
+                "uri": image_url
+            }
         },
         {
-            "type": "text",
-            "text": name,
-            "wrap": True,
-            "offsetStart": "md",
-            "position": "relative",
-            "gravity": "center",
-            "align": "start",
-            "weight": "bold"
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "height": "5px",
+                    "borderColor": "#007AFF",
+                    "width": f"{int(normalized_attendance * 100)}%",
+                    "backgroundColor": "#BBDBF3",
+                    "position": "absolute",
+                    "offsetTop": "30px"
+                },
+                {
+                    "type": "text",
+                    "text": name,
+                    "wrap": True,
+                    "position": "relative",
+                    "gravity": "center",
+                    "align": "start",
+                    "weight": "bold"
+                },
+                {
+                    "type": "text",
+                    "text": total_attendance,
+                    "flex": 0,
+                    "weight": "bold",
+                    "gravity": "center",
+                    "wrap": True,
+                }
+            ],
         },
-        {
-          "type": "text",
-          "text": total_attendance,
-          "flex": 0,
-          "weight": "bold",
-          "gravity": "center",
-          "wrap": True,
-          "offsetEnd": "xs"
-        }
         ],
         "position": "relative",
         "width": "100%",
-        "flex": 0
+        "flex": 0,
+        "spacing": "sm",
+        "paddingStart": "sm",
+        "paddingEnd": "xs",
     }
     return contents
 
