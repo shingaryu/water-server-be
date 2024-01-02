@@ -6,6 +6,7 @@ import pymongo
 from pymongo import MongoClient
 
 from common.get_logger import get_logger
+from templates.select_option_to_entry_template import ENTRY_OPTION_ID_ATTEND, ENTRY_OPTION_ID_HALFWAY
 
 load_dotenv()
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
@@ -99,8 +100,8 @@ def generate_member_info_dict(events: list) -> dict[str, MemberInfo]:
         for entry in entries:
             key: str = entry["user"]["userId"]
             display_name: str = entry["user"]["displayName"]
-            entry_status: int = int(entry["selectedOptionId"])
             picture_url: str = entry["user"]["pictureUrl"]
+            entry_status: str = entry["selectedOptionId"]
             event_datetime: datetime = event["startTime"]
             
             if key not in results:
@@ -108,8 +109,9 @@ def generate_member_info_dict(events: list) -> dict[str, MemberInfo]:
                 
             if (results[key].firstAttendanceDateTime > event_datetime):
                 results[key].setFirstAttendanceDateTime(event_datetime)
-            
-            if (entry_status <= 2): #See the definition of entry stats in select_option_to_entry_template.py.
+
+            # See the definition of entry stats in select_option_to_entry_template.py.
+            if entry_status is ENTRY_OPTION_ID_ATTEND or entry_status is ENTRY_OPTION_ID_HALFWAY:
                 results[key].setTotalAttendance(results[key].totalAttendance + 1)
     
     return results
