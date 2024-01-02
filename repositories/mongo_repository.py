@@ -89,7 +89,7 @@ class MemberInfo:
     def setFirstAttendanceDateTime(self, firstAttendanceDateTime: datetime) ->None:
         self.firstAttendanceDateTime = firstAttendanceDateTime
 
-# key: strying class. User's objectID from MongoDB
+# key: string class. User's objectID from MongoDB
 # Value: MemberInfo class.
 def generate_member_info_dict(events: list) -> dict[str, MemberInfo]:
     results: dict = dict()
@@ -99,11 +99,11 @@ def generate_member_info_dict(events: list) -> dict[str, MemberInfo]:
         for entry in entries:
             key: str = entry["user"]["userId"]
             display_name: str = entry["user"]["displayName"]
-            picture_url:str = entry["user"]["pictureUrl"]
             entry_status: int = int(entry["selectedOptionId"])
+            picture_url: str = entry["user"]["pictureUrl"]
             event_datetime: datetime = event["startTime"]
             
-            if (key not in results):
+            if key not in results:
                 results[key] = MemberInfo(display_name, picture_url)
                 
             if (results[key].firstAttendanceDateTime > event_datetime):
