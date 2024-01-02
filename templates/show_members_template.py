@@ -14,7 +14,11 @@ def member_contents(name: str, image_url: str, total_attendance: str) ->dict:
             "align": "start",
             "offsetStart": "sm",
             "offsetTop": "sm",
-            "flex": 0
+            "flex": 0,
+            "action": {
+                "type": "uri",
+                "uri": image_url
+            }
         },
         {
             "type": "text",
