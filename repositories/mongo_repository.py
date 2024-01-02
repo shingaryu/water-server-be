@@ -75,20 +75,20 @@ def find_all_members_in_the_event(event_id: ObjectId) -> dict:
 class MemberInfo:
     displayName: str
     pictureUrl: str
-    firstAttendanceDateTime: datetime
+    firstEntryDateTime: datetime
     totalAttendance: int
     
-    def __init__(self, displayName: str, pictureUrl: str, firstAttendanceDateTime:datetime = datetime(2099,1,1), totalAttendance: int = 0):
+    def __init__(self, displayName: str, pictureUrl: str, firstEntryDateTime:datetime = datetime(2099, 1, 1), totalAttendance: int = 0):
         self.displayName = displayName
         self.pictureUrl = pictureUrl
-        self.firstAttendanceDateTime = firstAttendanceDateTime
+        self.firstEntryDateTime = firstEntryDateTime
         self.totalAttendance = totalAttendance
         
     def setTotalAttendance(self, totalAttendance:int) ->None:
         self.totalAttendance = totalAttendance
         
-    def setFirstAttendanceDateTime(self, firstAttendanceDateTime: datetime) ->None:
-        self.firstAttendanceDateTime = firstAttendanceDateTime
+    def setFirstEntryDateTime(self, firstEntryDateTime: datetime) ->None:
+        self.firstEntryDateTime = firstEntryDateTime
 
 # key: string class. User's objectID from MongoDB
 # Value: MemberInfo class.
@@ -107,8 +107,8 @@ def generate_member_info_dict(events: list) -> dict[str, MemberInfo]:
             if key not in results:
                 results[key] = MemberInfo(display_name, picture_url)
                 
-            if (results[key].firstAttendanceDateTime > event_datetime):
-                results[key].setFirstAttendanceDateTime(event_datetime)
+            if results[key].firstEntryDateTime > event_datetime:
+                results[key].setFirstEntryDateTime(event_datetime)
 
             # See the definition of entry stats in select_option_to_entry_template.py.
             if entry_status is ENTRY_OPTION_ID_ATTEND or entry_status is ENTRY_OPTION_ID_HALFWAY:

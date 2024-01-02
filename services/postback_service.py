@@ -31,7 +31,7 @@ def show_members_message() -> list[FlexSendMessage]:
     #TODO Check if users are coming to the next event.　(Y/N)
     #TODO sort the user list by attendance to the next event. The absentees come first.
     
-    sorted_members_info = dict(sorted(members_info.items(), key=lambda item: (item[1].firstAttendanceDateTime, item[1].displayName)))
+    sorted_members_info = dict(sorted(members_info.items(), key=lambda item: (item[1].firstEntryDateTime, item[1].displayName)))
 
     #Generate flex send messages
     flex_messages = []   
