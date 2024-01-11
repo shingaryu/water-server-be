@@ -24,7 +24,7 @@ def show_recent_event_message():
     else:
         return select_option_to_entry_message(events[0]["_id"])
 
-def show_members_message() -> list[FlexSendMessage]:       
+def show_members_message():
     members_info: dict[str, MemberInfo] = generate_member_info_dict(find_all_events())
 
     #TODO Calculate the appearance (Appearance/The total events)
