@@ -1,6 +1,6 @@
 LOGO_BACKGROUND_COLOR = "#F3F2F9"
 
-def member_contents(name: str, image_url: str, total_attendance: str, normalized_attendance: float) ->dict:
+def member_contents(name: str, image_url: str, total_attendance: str, normalized_attendance: float):
     contents: dict = {
         "type": "box",
         "layout": "horizontal",
@@ -63,7 +63,7 @@ def member_contents(name: str, image_url: str, total_attendance: str, normalized
     return contents
 
 
-def member_list_bubble(header_title: str, member_contents: list) -> dict:
+def member_list_bubble(header_title: str, member_contents: list):
     bubble: dict = {
         "type": "bubble",
         "size": "mega",
