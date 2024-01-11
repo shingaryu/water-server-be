@@ -17,8 +17,6 @@ pyngrok = "^7.0.0"
 google-api-python-client = "^2.102.0"
 google-auth-oauthlib = "^1.1.0"
 google-auth-httplib2 = "^0.1.1"
-pandas = "~1.1.0"
-openpyxl = "^3.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pymongo = "^4.3.3"
