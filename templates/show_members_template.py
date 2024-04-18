@@ -1,3 +1,5 @@
+from common.utils import no_icon_image_public_url
+
 LOGO_BACKGROUND_COLOR = "#F3F2F9"
 
 def member_contents(name: str, image_url: str, total_attendance: str, normalized_attendance: float):
@@ -7,7 +9,7 @@ def member_contents(name: str, image_url: str, total_attendance: str, normalized
         "contents": [
         {
             "type": "image",
-            "url": image_url,
+            "url": image_url or no_icon_image_public_url(),
             "size": "xxs",
             "position": "relative",
             "aspectMode": "cover",
@@ -16,7 +18,7 @@ def member_contents(name: str, image_url: str, total_attendance: str, normalized
             "flex": 0,
             "action": {
                 "type": "uri",
-                "uri": image_url
+                "uri": image_url or no_icon_image_public_url()
             }
         },
         {

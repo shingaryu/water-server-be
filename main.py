@@ -4,12 +4,12 @@ import traceback
 
 from bson import ObjectId
 from dotenv import load_dotenv
-from pyngrok import ngrok
 
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS, \
     SHOW_VIDEOS_PLAYLIST
 from repositories.youtube_repository import refresh_token_if_expired
+from services.ngrok_service import connect_http_tunnel
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
     show_members_message, \
     show_recent_event_message, recent_videos, playlist_videos_message
@@ -157,6 +157,6 @@ def postback(line_event):
 if __name__ == '__main__':
     logger.info('開発サーバーモードでFlaskアプリケーションを起動します…')
     ssl._create_default_https_context = ssl._create_unverified_context
-    http_tunnel = ngrok.connect("5000", "http")
-    set_webhook_url(http_tunnel.public_url)
+    public_url = connect_http_tunnel()
+    set_webhook_url(public_url)
     app.run()
