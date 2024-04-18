@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "water-server-be"
-version = "1.4.2"
+version = "1.4.3"
 description = ""
 authors = ["shingaryu <shingaryu@gmail.com>"]
 readme = "README.md"
