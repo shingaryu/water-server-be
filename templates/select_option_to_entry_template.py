@@ -1,5 +1,5 @@
 from common.consts import ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION
-from common.utils import format_date
+from common.utils import format_date, no_icon_image_public_url
 
 WATER_COOLER_BLUE = "#007AFF"
 MIDNIGHT_BLUE = "#001E43"
@@ -440,7 +440,7 @@ def attendees_box(attendees):
                 {
                     "type": "image",
                     "flex": 0,
-                    "url": attendee["pictureUrl"],
+                    "url": attendee["pictureUrl"] or no_icon_image_public_url(),
                     "size": "18px",
                 }, {
                     "type": "text",
@@ -471,7 +471,7 @@ def absentees_box(absentees):
         contents.append({
                     "type": "image",
             "flex": 0,
-                    "url": absentee["pictureUrl"],
+                    "url": absentee["pictureUrl"] or no_icon_image_public_url(),
                     "size": "18px",
             "margin": "4px"
         })
