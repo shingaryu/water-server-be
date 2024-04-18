@@ -1,4 +1,3 @@
-from flask import url_for
 from services.ngrok_service import get_ngrok_public_url
 
 
@@ -11,5 +10,6 @@ def format_date(date):
     text = f'{mon}/{day} ({a}) {hour}:{minutes}'
     return text
 
+
 def no_icon_image_public_url():
-    return f'{get_ngrok_public_url()}{url_for("static", filename="no_icon_image.png")}'
+    return f'{get_ngrok_public_url()}/static/no_icon_image.png'
