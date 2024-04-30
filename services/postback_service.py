@@ -5,6 +5,7 @@ from linebot.models import FlexSendMessage, TextSendMessage, CarouselTemplate, C
 
 from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, SHOW_VIDEOS, SHOW_VIDEOS_PLAYLIST
 from common.get_logger import get_logger
+from common.utils import no_icon_image_public_url
 from repositories.youtube_repository import get_my_recent_videos, get_playlist_videos, get_my_playlists
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
     insert_entry, delete_entry, generate_member_info_dict, MemberInfo
@@ -166,19 +167,42 @@ def videos_quick_reply_obj():
 def recent_videos():
     videos = get_my_recent_videos()[:10]
 
-    template = CarouselTemplate(
-        columns=[
-            CarouselColumn(
-                thumbnail_image_url=video.get("snippet").get("thumbnails").get("high").get("url"),
-                title=video.get("snippet").get("title")[:40] or " ", # 最大40文字(Messaging API制限)、must be non-empty text
-                text=video.get("snippet").get("description")[:60] or " ", # 最大60文字(Messaging API制限)、must be non-empty text
-                default_action=URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}"),
-                actions=[
-                    URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}")
-                ]
-            ) for video in videos
-        ]
-    )
+    columns = []
+    for video in videos:
+        thumbnail_image_url = no_icon_image_public_url()
+        title = " "
+        text = " " # required
+        action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v=videoid") # required
+
+        try:
+            thumbnail_image_url = video.get("snippet").get("thumbnails").get("high").get("url")
+        except Exception as e:
+            logger.warn(f"failed to get thumbnail_image_url. setting empty value...")
+
+        try:
+            title = video.get("snippet").get("title")[:40] or " "  # 最大40文字(Messaging API制限)、must be non-empty text
+        except Exception as e:
+            logger.warn(f"failed to get title. setting empty value...")
+
+        try:
+            text = video.get("snippet").get("description")[:60] or " "  # 最大60文字(Messaging API制限)、must be non-empty text
+        except Exception as e:
+            logger.warn(f"failed to get description. setting empty value...")
+
+        try:
+            action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}")
+        except Exception as e:
+            logger.warn(f"failed to get videoId. setting empty value...")
+
+        columns.append(CarouselColumn(
+            thumbnail_image_url=thumbnail_image_url,
+            title=title,
+            text=text,
+            default_action=action,
+            actions=[action]
+        ))
+
+    template = CarouselTemplate(columns=columns)
 
     message = TemplateSendMessage(alt_text="動画一覧", template=template, quick_reply=videos_quick_reply_obj())
 
@@ -187,19 +211,42 @@ def recent_videos():
 def playlist_videos_message(playlist_id: str):
     videos = get_playlist_videos(playlist_id)[:10]
 
-    template = CarouselTemplate(
-        columns=[
-            CarouselColumn(
-                thumbnail_image_url=video.get("snippet").get("thumbnails").get("high").get("url"),
-                title=video.get("snippet").get("title")[:40] or " ", # 最大40文字(Messaging API制限)、must be non-empty text
-                text=video.get("snippet").get("description")[:60] or " ", # 最大60文字(Messaging API制限)、must be non-empty text
-                default_action=URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('snippet').get('resourceId').get('videoId')}"),
-                actions=[
-                    URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('snippet').get('resourceId').get('videoId')}")
-                ]
-            ) for video in videos
-        ]
-    )
+    columns = []
+    for video in videos:
+        thumbnail_image_url = no_icon_image_public_url()
+        title = " "
+        text = " " # required
+        action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v=videoid") # required
+
+        try:
+            thumbnail_image_url = video.get("snippet").get("thumbnails").get("high").get("url")
+        except Exception as e:
+            logger.warn(f"failed to get thumbnail_image_url. setting empty value...")
+
+        try:
+            title = video.get("snippet").get("title")[:40] or " "  # 最大40文字(Messaging API制限)、must be non-empty text
+        except Exception as e:
+            logger.warn(f"failed to get title. setting empty value...")
+
+        try:
+            text = video.get("snippet").get("description")[:60] or " "  # 最大60文字(Messaging API制限)、must be non-empty text
+        except Exception as e:
+            logger.warn(f"failed to get description. setting empty value...")
+
+        try:
+            action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('snippet').get('resourceId').get('videoId')}")  # ここだけrecent_videosと異なる
+        except Exception as e:
+            logger.warn(f"failed to get videoId. setting empty value...")
+
+        columns.append(CarouselColumn(
+            thumbnail_image_url=thumbnail_image_url,
+            title=title,
+            text=text,
+            default_action=action,
+            actions=[action]
+        ))
+
+    template = CarouselTemplate(columns=columns)
 
     message = TemplateSendMessage(alt_text="動画一覧", template=template, quick_reply=videos_quick_reply_obj())
 
