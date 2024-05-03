@@ -164,35 +164,25 @@ def videos_quick_reply_obj():
 
     return QuickReply(items=items)
 
+
+def get_or_default(video, func, default):
+    try:
+        res = func(video)
+        return res or default
+    except Exception as e:
+        logger.warn(f"failed to get attribute of the video. setting default value...")
+        return default
+
+
 def recent_videos():
     videos = get_my_recent_videos()[:10]
 
     columns = []
     for video in videos:
-        thumbnail_image_url = no_icon_image_public_url()
-        title = " "
-        text = " " # required
-        action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v=videoid") # required
-
-        try:
-            thumbnail_image_url = video.get("snippet").get("thumbnails").get("high").get("url")
-        except Exception as e:
-            logger.warn(f"failed to get thumbnail_image_url. setting empty value...")
-
-        try:
-            title = video.get("snippet").get("title")[:40] or " "  # 最大40文字(Messaging API制限)、must be non-empty text
-        except Exception as e:
-            logger.warn(f"failed to get title. setting empty value...")
-
-        try:
-            text = video.get("snippet").get("description")[:60] or " "  # 最大60文字(Messaging API制限)、must be non-empty text
-        except Exception as e:
-            logger.warn(f"failed to get description. setting empty value...")
-
-        try:
-            action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('id').get('videoId')}")
-        except Exception as e:
-            logger.warn(f"failed to get videoId. setting empty value...")
+        thumbnail_image_url = get_or_default(video, lambda x: x.get("snippet").get("thumbnails").get("high").get("url"), no_icon_image_public_url())
+        title = get_or_default(video, lambda x: x.get("snippet").get("title")[:40], " ")
+        text = get_or_default(video, lambda x: x.get("snippet").get("description")[:60], " ")  # required
+        action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={get_or_default(video, lambda x: x.get('id').get('videoId'), 'error')}")  # required
 
         columns.append(CarouselColumn(
             thumbnail_image_url=thumbnail_image_url,
@@ -208,35 +198,16 @@ def recent_videos():
 
     return message
 
+
 def playlist_videos_message(playlist_id: str):
     videos = get_playlist_videos(playlist_id)[:10]
 
     columns = []
     for video in videos:
-        thumbnail_image_url = no_icon_image_public_url()
-        title = " "
-        text = " " # required
-        action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v=videoid") # required
-
-        try:
-            thumbnail_image_url = video.get("snippet").get("thumbnails").get("high").get("url")
-        except Exception as e:
-            logger.warn(f"failed to get thumbnail_image_url. setting empty value...")
-
-        try:
-            title = video.get("snippet").get("title")[:40] or " "  # 最大40文字(Messaging API制限)、must be non-empty text
-        except Exception as e:
-            logger.warn(f"failed to get title. setting empty value...")
-
-        try:
-            text = video.get("snippet").get("description")[:60] or " "  # 最大60文字(Messaging API制限)、must be non-empty text
-        except Exception as e:
-            logger.warn(f"failed to get description. setting empty value...")
-
-        try:
-            action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={video.get('snippet').get('resourceId').get('videoId')}")  # ここだけrecent_videosと異なる
-        except Exception as e:
-            logger.warn(f"failed to get videoId. setting empty value...")
+        thumbnail_image_url = get_or_default(video, lambda x: x.get("snippet").get("thumbnails").get("high").get("url"), no_icon_image_public_url())
+        title = get_or_default(video, lambda x: x.get("snippet").get("title")[:40], " ")
+        text = get_or_default(video, lambda x: x.get("snippet").get("description")[:60], " ")  # required
+        action = URIAction(label="見る", uri=f"https://www.youtube.com/watch?v={get_or_default(video, lambda x: x.get('snippet').get('resourceId').get('videoId'), 'error')}")  # required, ここだけrecent_videosと異なる
 
         columns.append(CarouselColumn(
             thumbnail_image_url=thumbnail_image_url,
