@@ -8,17 +8,19 @@ from dotenv import load_dotenv
 from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, \
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS, \
     SHOW_VIDEOS_PLAYLIST
-from repositories.youtube_repository import refresh_token_if_expired
+from common.utils import no_icon_image_public_url
+from repositories.mongo_repository import find_recent_events
+from repositories.youtube_repository import refresh_token_if_expired, get_my_recent_videos
 from services.ngrok_service import connect_http_tunnel
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
     show_members_message, \
-    show_recent_event_message, recent_videos, playlist_videos_message
+    show_recent_event_message, recent_videos, playlist_videos_message, get_or_default
 from services.remind_service import REMIND_INTERVAL_MIN, REMIND_SOONER_THAN_HOURS, remind_closest_event
 from set_webhook_url import set_webhook_url
 
 load_dotenv()
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from linebot import WebhookHandler
 from linebot.models import (
     MessageEvent, PostbackEvent, TextMessage,
@@ -63,9 +65,27 @@ scheduler.add_job(
 )
 scheduler.start()
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/events')
+def show_events():
+    events = find_recent_events(5)  # MongoDBから開催日のデータを取得
+    return render_template('events.html', events=events)
+
+@app.route('/movies')
+def show_movies():
+    youtube_videos = get_my_recent_videos()
+
+    videos = []
+    for video in youtube_videos:
+        thumbnail_image_url = get_or_default(video, lambda x: x.get("snippet").get("thumbnails").get("high").get("url"), no_icon_image_public_url())
+        title = get_or_default(video, lambda x: x.get("snippet").get("title")[:40], " ")
+        text = get_or_default(video, lambda x: x.get("snippet").get("description")[:60], " ")
+        video_id = get_or_default(video, lambda x: x.get('id').get('videoId'), 'error')
+        videos.append({ "thumbnail": thumbnail_image_url, "title": title, "description": text, "id": video_id})
+    return render_template('movies.html', videos=videos)
 
 @app.route("/callback", methods=['POST'])
 def request_handler():
