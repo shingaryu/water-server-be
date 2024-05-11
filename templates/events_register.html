@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開催日を登録</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>開催日を登録</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="location">開催場所</label>
+            <input type="text" class="form-control" id="location" name="location" value="{{ place }}" required>
+        </div>
+        <div class="form-group">
+            <label>開催日</label>
+            <div>
+                <button type="submit" name="show_dates" class="btn btn-secondary">日付を表示</button>
+            </div>
+            <div>
+                {% for day, data in days_data.items() %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ day }}" name="days" value="{{ day }}" {{ data.checked }}>
+                    <label class="form-check-label" for="{{ day }}">{{ day }}</label>
+                </div>
+                {% if data.dates %}
+                <ul>
+                    {% for date in data.dates %}
+                    <li>
+                        <input type="checkbox" name="selected_dates" value="{{ date }}">
+                        {{ date }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">チェックした開催日を登録</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

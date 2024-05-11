@@ -1,6 +1,7 @@
 import os
 import ssl
 import traceback
+from datetime import datetime, timedelta
 
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -20,7 +21,7 @@ from set_webhook_url import set_webhook_url
 
 load_dotenv()
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, session, redirect, url_for
 from linebot import WebhookHandler
 from linebot.models import (
     MessageEvent, PostbackEvent, TextMessage,
@@ -37,6 +38,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # セッションを安全に使うための秘密鍵
+
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
@@ -73,6 +76,31 @@ def index():
 def show_events():
     events = find_recent_events(5)  # MongoDBから開催日のデータを取得
     return render_template('events.html', events=events)
+
+def generate_dates(day_of_week):
+    return ["1", "8", "15", "22"] # todo: 曜日に合わせた日付を返す
+
+@app.route('/events/register', methods=['GET', 'POST'])
+def show_events_register():
+    if request.method == 'POST': # ボタンクリック時
+        # ユーザーの入力状態をsessionに保存
+        session['location'] = request.form.get('location', '')
+        selected_days = request.form.getlist('days')
+        session['days_data'] = {
+            day: {
+                'checked': 'checked' if day in selected_days else '',
+                'dates': generate_dates(i) if day in selected_days else []
+            }
+            for i, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+        }
+
+        if 'show_dates' in request.form: # 日付を表示 クリック
+            return redirect(url_for('show_events_register')) # -> GETリクエストへ
+        else:  # チェックした開催日を登録 クリック
+            return redirect(url_for('show_events')) # todo: MongoDBへのデータ登録処理
+
+    # GETリクエスト(ページ読み込み時)
+    return render_template('events_register.html', days_data=session.get('days_data', {}), place=session.get('location', ''))
 
 @app.route('/movies')
 def show_movies():
