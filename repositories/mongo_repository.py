@@ -34,9 +34,13 @@ def find_recent_events(n_items):
 
     return results
 
-def find_all_events():
+def find_all_events(ascending = False):
     logger.info('Find all events...')
-    results = list(events_collection.find())
+    events = events_collection.find()
+    if ascending:
+        events = events.sort("startTime", -1)
+
+    results = list(events)
 
     return results
 
@@ -143,9 +147,9 @@ def insert_event(document):
     logger.debug(f'New document id: {result.inserted_id}')
     return result
 
-def delete_event(id):
-    logger.info(f'Delete event: {str(id)}...')
-    filter = {"_id": id}
+def delete_event(oid):
+    logger.info(f'Delete event: {str(oid)}...')
+    filter = {"_id": oid}
     result = events_collection.delete_one(filter)
 
     logger.debug(f'{result.deleted_count} document(s) deleted')

@@ -12,7 +12,7 @@ from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_EN
     SHOW_VIDEOS_PLAYLIST
 from common.utils import no_icon_image_public_url
 from create_rich_menu import create_rich_menu
-from repositories.mongo_repository import find_recent_events, insert_event
+from repositories.mongo_repository import find_recent_events, insert_event, find_all_events, delete_event
 from repositories.youtube_repository import refresh_token_if_expired, get_my_recent_videos
 from services.ngrok_service import connect_http_tunnel
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
@@ -92,7 +92,7 @@ def generate_dates(year, month, weekday):
     return dates
 
 @app.route('/events/register', methods=['GET', 'POST'])
-def show_events_register():
+def events_register():
     if request.method == 'POST': # ボタンクリック時
         # ユーザーの入力状態をsessionに保存
         session['location'] = request.form.get('location', '◯◯体育館')
@@ -108,7 +108,7 @@ def show_events_register():
 
         if 'show_dates' in request.form: # 日付を表示 クリック
             session['dates'] = [date.strftime('%Y-%m-%d') for date in generate_dates(session['selected_year'], session['selected_month'], session['selected_dayofweek'])]
-            return redirect(url_for('show_events_register')) # -> GETリクエストへ
+            return redirect(url_for('events_register')) # -> GETリクエストへ
         else:  # 選択した開催日を登録 クリック
             for date_str in selected_dates:
                 location = session.get('location', '◯◯体育館')
@@ -133,7 +133,8 @@ def show_events_register():
                     ]
                 }
                 insert_event(event_document)
-            return redirect(url_for('show_events'))
+            session['dates'] = {}
+            return redirect(url_for('events_register'))
 
     # GETリクエスト(ページ読み込み時)
     return render_template('events_register.html',
@@ -147,6 +148,17 @@ def show_events_register():
         end_hour=session.get('end_hour', 12),
         end_minute=session.get('end_minute', 0),
     )
+
+@app.route('/events/delete', methods=['GET', 'POST'])
+def events_delete():
+    if request.method == 'POST':
+        if 'delete_event' in request.form:
+            event_id = request.form['delete_event']
+            delete_event(ObjectId(event_id))
+            return redirect(url_for('events_delete'))
+
+    events = find_all_events(ascending=True)
+    return render_template('events_delete.html', events=events)
 
 @app.route('/movies')
 def show_movies():
