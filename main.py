@@ -1,6 +1,8 @@
 import os
 import ssl
 import traceback
+import calendar
+from datetime import datetime
 
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -10,7 +12,7 @@ from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_EN
     SHOW_VIDEOS_PLAYLIST
 from common.utils import no_icon_image_public_url
 from create_rich_menu import create_rich_menu
-from repositories.mongo_repository import find_recent_events
+from repositories.mongo_repository import find_recent_events, insert_event
 from repositories.youtube_repository import refresh_token_if_expired, get_my_recent_videos
 from services.ngrok_service import connect_http_tunnel
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
@@ -76,33 +78,75 @@ def index():
 
 @app.route('/events')
 def show_events():
-    events = find_recent_events(5)  # MongoDBから開催日のデータを取得
+    events = find_recent_events(30)  # MongoDBから開催日のデータを取得
     return render_template('events.html', events=events)
 
-def generate_dates(day_of_week):
-    return ["1", "8", "15", "22"] # todo: 曜日に合わせた日付を返す
+def generate_dates(year, month, weekday):
+    # 指定された年月のカレンダーを作成
+    cal = calendar.monthcalendar(year, month)
+    dates = []
+    # カレンダーから指定された曜日の日付を抽出
+    for week in cal:
+        if week[weekday] != 0:  # calendar.monthcalendarは日付がない場合0を返す
+            dates.append(datetime(year, month, week[weekday]))
+    return dates
 
 @app.route('/events/register', methods=['GET', 'POST'])
 def show_events_register():
     if request.method == 'POST': # ボタンクリック時
         # ユーザーの入力状態をsessionに保存
-        session['location'] = request.form.get('location', '')
-        selected_days = request.form.getlist('days')
-        session['days_data'] = {
-            day: {
-                'checked': 'checked' if day in selected_days else '',
-                'dates': generate_dates(i) if day in selected_days else []
-            }
-            for i, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-        }
+        session['location'] = request.form.get('location', '◯◯体育館')
+        session['selected_year'] = int(request.form.get('selected_year', datetime.now().year))
+        session['selected_month'] = int(request.form.get('selected_month', (datetime.now().month % 12) + 1))
+        session['selected_dayofweek'] = int(request.form.get('dayOfWeek', 0))
+        session['start_hour'] = int(request.form['start_hour'])
+        session['start_minute'] = int(request.form['start_minute'])
+        session['end_hour'] = int(request.form['end_hour'])
+        session['end_minute'] = int(request.form['end_minute'])
+
+        selected_dates = request.form.getlist('selected_dates')
 
         if 'show_dates' in request.form: # 日付を表示 クリック
+            session['dates'] = [date.strftime('%Y-%m-%d') for date in generate_dates(session['selected_year'], session['selected_month'], session['selected_dayofweek'])]
             return redirect(url_for('show_events_register')) # -> GETリクエストへ
-        else:  # チェックした開催日を登録 クリック
-            return redirect(url_for('show_events')) # todo: MongoDBへのデータ登録処理
+        else:  # 選択した開催日を登録 クリック
+            for date_str in selected_dates:
+                location = session.get('location', '◯◯体育館')
+                start_hour = session.get('start_hour', 0)
+                start_minute = session.get('start_minute', 0)
+                end_hour = session.get('end_hour', 0)
+                end_minute = session.get('end_minute', 0)
+
+                # 日時オブジェクトの作成
+                start_time = datetime.strptime(f"{date_str} {start_hour}:{start_minute}", "%Y-%m-%d %H:%M")
+                end_time = datetime.strptime(f"{date_str} {end_hour}:{end_minute}", "%Y-%m-%d %H:%M")
+
+                # MongoDBドキュメントの作成
+                event_document = {
+                    "startTime": start_time,
+                    "endTime": end_time,
+                    "place": location,
+                    "entryOptions": [
+                        {"id": "1", "text": "参加"},
+                        {"id": "2", "text": "途中参加"},
+                        {"id": "3", "text": "不参加"}
+                    ]
+                }
+                insert_event(event_document)
+            return redirect(url_for('show_events'))
 
     # GETリクエスト(ページ読み込み時)
-    return render_template('events_register.html', days_data=session.get('days_data', {}), place=session.get('location', ''))
+    return render_template('events_register.html',
+        place=session.get('location', '◯◯体育館'),
+        selected_year=session.get('selected_year', datetime.now().year),
+        selected_month = session.get('selected_month', (datetime.now().month % 12) + 1),
+        selected_dayofweek = session.get('selected_dayofweek', 0),
+        dates=session.get('dates', {}),
+        start_hour=session.get('start_hour', 9),
+        start_minute=session.get('start_minute', 0),
+        end_hour=session.get('end_hour', 12),
+        end_minute=session.get('end_minute', 0),
+    )
 
 @app.route('/movies')
 def show_movies():

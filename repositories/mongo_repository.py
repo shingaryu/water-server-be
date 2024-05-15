@@ -137,6 +137,20 @@ def delete_entry(id):
     logger.debug(f'{result.deleted_count} document(s) deleted')
     return result
 
+def insert_event(document):
+    logger.info(f'Insert event...')
+    result = events_collection.insert_one(document)
+    logger.debug(f'New document id: {result.inserted_id}')
+    return result
+
+def delete_event(id):
+    logger.info(f'Delete event: {str(id)}...')
+    filter = {"_id": id}
+    result = events_collection.delete_one(filter)
+
+    logger.debug(f'{result.deleted_count} document(s) deleted')
+    return result
+
 def update_event(oid, field_dict_to_update):
     logger.info(f'Update event {str(oid)} with {field_dict_to_update}...')
     filter = {"_id": oid}
