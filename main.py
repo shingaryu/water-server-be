@@ -98,18 +98,16 @@ def events_register():
         session['location'] = request.form.get('location', '◯◯体育館')
         session['selected_year'] = int(request.form.get('selected_year', datetime.now().year))
         session['selected_month'] = int(request.form.get('selected_month', (datetime.now().month % 12) + 1))
-        session['selected_dayofweek'] = int(request.form.get('dayOfWeek', 0))
+        session['selected_dayofweek'] = int(request.form.get('dayOfWeek', 6))
+        # session['dates'] = request.form.get({}) # ユーザー入力で変更されないので不要
         session['start_hour'] = int(request.form['start_hour'])
         session['start_minute'] = int(request.form['start_minute'])
         session['end_hour'] = int(request.form['end_hour'])
         session['end_minute'] = int(request.form['end_minute'])
 
-        selected_dates = request.form.getlist('selected_dates')
+        selected_dates = request.form.getlist('selected_dates') # sessionに保存せず、送信してリロードしたら自然に消去
 
-        if 'show_dates' in request.form: # 日付を表示 クリック
-            session['dates'] = [date.strftime('%Y-%m-%d') for date in generate_dates(session['selected_year'], session['selected_month'], session['selected_dayofweek'])]
-            return redirect(url_for('events_register')) # -> GETリクエストへ
-        else:  # 選択した開催日を登録 クリック
+        if 'apply_button' in request.form:  # 選択した開催日を登録 クリック
             for date_str in selected_dates:
                 location = session.get('location', '◯◯体育館')
                 start_hour = session.get('start_hour', 0)
@@ -133,16 +131,20 @@ def events_register():
                     ]
                 }
                 insert_event(event_document)
-            session['dates'] = {}
+            session['selected_dayofweek'] = 6
+            session['dates'] = [date.strftime('%Y-%m-%d') for date in generate_dates(session['selected_year'], session['selected_month'], 6)]
             return redirect(url_for('events_register'))
+        else: # 年、月、曜日ドロップダウンの選択状態変更
+            session['dates'] = [date.strftime('%Y-%m-%d') for date in generate_dates(session['selected_year'], session['selected_month'], session['selected_dayofweek'])]
+            return redirect(url_for('events_register')) # -> GETリクエストへ
 
     # GETリクエスト(ページ読み込み時)
     return render_template('events_register.html',
         place=session.get('location', '◯◯体育館'),
         selected_year=session.get('selected_year', datetime.now().year),
         selected_month = session.get('selected_month', (datetime.now().month % 12) + 1),
-        selected_dayofweek = session.get('selected_dayofweek', 0),
-        dates=session.get('dates', {}),
+        selected_dayofweek = session.get('selected_dayofweek', 6),
+        dates=session.get('dates', [date.strftime('%Y-%m-%d') for date in generate_dates(datetime.now().year, (datetime.now().month % 12) + 1, 6)]),
         start_hour=session.get('start_hour', 9),
         start_minute=session.get('start_minute', 0),
         end_hour=session.get('end_hour', 12),

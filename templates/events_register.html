@@ -25,13 +25,13 @@
     </div>
     <form method="POST">
         <div class="form-group d-flex align-items-center">
-            <select class="form-control mx-2 year-select" name="selected_year">
+            <select class="form-control mx-2 year-select" name="selected_year" onchange="submitForm()">
                 {% for year in range(2021, 2031) %}
                 <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
                 {% endfor %}
             </select>
             <label>年</label>
-            <select class="form-control mx-2 month-select" name="selected_month">
+            <select class="form-control mx-2 month-select" name="selected_month" onchange="submitForm()">
                 {% for month in range(1, 13) %}
                 <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}</option>
                 {% endfor %}
@@ -45,7 +45,7 @@
         <div class="form-group">
             <div class="form-group">
                 <label for="dayOfWeek">曜日を選択</label>
-                <select class="form-control" id="dayOfWeek" name="dayOfWeek">
+                <select class="form-control" id="dayOfWeek" name="dayOfWeek" onchange="submitForm()">
                     <option value="0" {% if 0 == selected_dayofweek %}selected{% endif %}>月曜日</option>
                     <option value="1" {% if 1 == selected_dayofweek %}selected{% endif %}>火曜日</option>
                     <option value="2" {% if 2 == selected_dayofweek %}selected{% endif %}>水曜日</option>
@@ -55,7 +55,6 @@
                     <option value="6" {% if 6 == selected_dayofweek %}selected{% endif %}>日曜日</option>
                 </select>
             </div>
-            <button type="submit" name="show_dates" class="btn btn-secondary">日付を表示</button>
             {% if dates %}
                 <div class="form-group mt-2">
                     <label>選択可能な日付:</label>
@@ -98,12 +97,16 @@
             </select>
             <label>分</label>
         </div>
-        <div class="mt-5">
-            <button type="submit" class="btn btn-primary ">開催日を登録</button>
+        <div>
+            <button type="submit" name="apply_button" class="btn btn-primary ">開催日を登録</button>
         </div>
     </form>
 </div>
-
+<script>
+function submitForm() {
+    document.querySelector('form').submit();  // フォームを送信
+}
+</script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
