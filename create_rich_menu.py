@@ -1,11 +1,12 @@
 from dotenv import load_dotenv
 
-from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS
+from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, SHOW_VIDEOS, SHOW_MEMBERS
+from services.ngrok_service import current_ngrok_public_url
 
 load_dotenv()
 
 from linebot.models import (
-    RichMenu, RichMenuSize, RichMenuArea, RichMenuBounds, PostbackAction
+    RichMenu, RichMenuSize, RichMenuArea, RichMenuBounds, PostbackAction, URIAction
 )
 import os
 import datetime
@@ -14,27 +15,19 @@ from common.line_bot_client import get_line_bot_client
 
 # 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ず同ディレクトリで実行すること
 RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
-POSTBACK_DATA = [
-    f'{SHOW_NEXT_EVENT}',
-    f'{SHOW_EVENTS}',
-    f'{SHOW_MEMBERS}',
-    f'richmenu/?area=3',
-    f'{SHOW_VIDEOS}',
-    f'{AKIO_BUTTON}'
-]
-
-DISPLAY_TEXTS = [
-    '参加登録',
-    '開催日一覧',
-    'メンバーリスト',
-    'bWVtYmVyIGxpc3Q=',
-    'ムービー',
-    'はやしあきお',
-]
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 def create_rich_menu():
+    actions = [
+        PostbackAction(data=f'{SHOW_NEXT_EVENT}', display_text='参加登録'),
+        PostbackAction(data=f'{SHOW_EVENTS}', display_text='開催日一覧'),
+        PostbackAction(data=f'{SHOW_MEMBERS}', display_text='メンバーリスト'),
+        PostbackAction(data=f'richmenu/?area=3', display_text='bWVtYmVyIGxpc3Q='),
+        PostbackAction(data=f'{SHOW_VIDEOS}', display_text='ムービー'),
+        URIAction(uri=f'{current_ngrok_public_url()}/events/register', label='開催日の登録')
+    ]
+
     line_bot_api = get_line_bot_client()
 
     logger.info('Delete all rich menus...')
@@ -51,7 +44,7 @@ def create_rich_menu():
         chat_bar_text='メニュー',
         areas=[RichMenuArea(
             bounds=RichMenuBounds(x=(i % 3) * 833, y=(i // 3) * 843, width=833, height=843),
-            action=PostbackAction(data=POSTBACK_DATA[i], display_text=DISPLAY_TEXTS[i])) for i in range(6)]
+            action=actions[i]) for i in range(6)]
     )
     rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
     logger.info(f'Rich menu created: {rich_menu_id}')
