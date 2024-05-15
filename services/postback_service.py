@@ -12,7 +12,6 @@ from repositories.mongo_repository import find_recent_events, find_all_events, f
 from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
 from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
 from templates.show_members_template import member_contents, member_list_bubble
-from create_rich_menu import DISPLAY_TEXTS
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
@@ -57,7 +56,7 @@ def show_members_message():
 
         if member_list_num == 1:
             if (count == len(sorted_members_info)):
-                contents = member_list_bubble(DISPLAY_TEXTS[2], users_flex_contents)
+                contents = member_list_bubble('メンバーリスト', users_flex_contents)
                 flex_message = FlexSendMessage(
                     alt_text='メンバー一覧',
                     contents=contents
@@ -66,7 +65,7 @@ def show_members_message():
         else:
             if (count % max_count_in_a_bubble == 0) or (count == len(sorted_members_info)):
                 member_list_count += 1
-                contents = member_list_bubble(DISPLAY_TEXTS[2] +" (%s)" % (str(member_list_count) + "/" + str(member_list_num)), users_flex_contents)
+                contents = member_list_bubble('メンバーリスト' +" (%s)" % (str(member_list_count) + "/" + str(member_list_num)), users_flex_contents)
                 flex_message = FlexSendMessage(
                     alt_text='メンバー一覧',
                     contents=contents

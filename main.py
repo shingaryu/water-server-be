@@ -1,7 +1,6 @@
 import os
 import ssl
 import traceback
-from datetime import datetime, timedelta
 
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -10,6 +9,7 @@ from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_EN
     ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH_OPTION_OPTION, SHOW_NEXT_EVENT, AKIO_BUTTON, SHOW_VIDEOS, SHOW_MEMBERS, \
     SHOW_VIDEOS_PLAYLIST
 from common.utils import no_icon_image_public_url
+from create_rich_menu import create_rich_menu
 from repositories.mongo_repository import find_recent_events
 from repositories.youtube_repository import refresh_token_if_expired, get_my_recent_videos
 from services.ngrok_service import connect_http_tunnel
@@ -209,4 +209,5 @@ if __name__ == '__main__':
     ssl._create_default_https_context = ssl._create_unverified_context
     public_url = connect_http_tunnel(port_to_serve)
     set_webhook_url(public_url)
+    create_rich_menu()
     app.run(port=port_to_serve)
