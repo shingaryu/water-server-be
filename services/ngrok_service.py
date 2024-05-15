@@ -40,7 +40,7 @@ def fetch_ngrok_public_url(port):
     # ngrokのAPIにアクセスしてpublic_urlを取得する
     response = requests.get("http://localhost:4040/api/tunnels")
     tunnels = response.json()["tunnels"]
-    http_tunnel = next((tunnel for tunnel in tunnels if f":{port}" in tunnel.get("config").get("addr")), None)
+    http_tunnel = next((tunnel for tunnel in tunnels if tunnel.get("proto") == "https" and f":{port}" in tunnel.get("config").get("addr")), None)
 
     if http_tunnel is None:
         logger.error(f"There is no http tunnel on port {port} in running ngrok instance")
