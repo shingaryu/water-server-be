@@ -40,13 +40,6 @@ app = Flask(__name__)
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
 
-REFRESH_TOKEN_INTERVAL_MIN = 60 * 12
-
-# Todo: このバックグラウンドジョブが本当に必要かどうか調査
-def refresh_googleapi_token():
-    logger.info("Google API トークンの有効期限を確認しています…")
-    refresh_token_if_expired()
-
 # REMIND_INTERVAL_MIN分ごとにremind_closest_eventを実行するよう指示
 scheduler = BackgroundScheduler(daemon=True)  # background thread
 logger.info('schedulerジョブを設定します...')
@@ -57,11 +50,6 @@ scheduler.add_job(
     trigger='interval',
     args=[line_bot_api],
     minutes=REMIND_INTERVAL_MIN
-)
-scheduler.add_job(
-    func=refresh_googleapi_token,
-    trigger='interval',
-    minutes=REFRESH_TOKEN_INTERVAL_MIN
 )
 scheduler.start()
 
