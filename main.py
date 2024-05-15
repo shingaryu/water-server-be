@@ -34,6 +34,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
+port_to_serve = int(os.environ.get('PORT', 5000))  # 5000はflaskのデフォルトポート
+logger.info(f'Flask application is to be served on port {port_to_serve}')
 app = Flask(__name__)
 line_bot_api = get_line_bot_client()
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', None))
@@ -157,6 +159,6 @@ def postback(line_event):
 if __name__ == '__main__':
     logger.info('開発サーバーモードでFlaskアプリケーションを起動します…')
     ssl._create_default_https_context = ssl._create_unverified_context
-    public_url = connect_http_tunnel()
+    public_url = connect_http_tunnel(port_to_serve)
     set_webhook_url(public_url)
-    app.run()
+    app.run(port=port_to_serve)

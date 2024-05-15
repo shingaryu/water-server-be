@@ -1,4 +1,4 @@
-from services.ngrok_service import get_ngrok_public_url
+from services.ngrok_service import current_ngrok_public_url
 
 
 def format_date(date):
@@ -12,4 +12,4 @@ def format_date(date):
 
 
 def no_icon_image_public_url():
-    return f'{get_ngrok_public_url()}/static/no_icon_image.png'
+    return f'{current_ngrok_public_url()}/static/no_icon_image.png'
