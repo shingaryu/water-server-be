@@ -12,7 +12,7 @@ from common.consts import SHOW_EVENTS, SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_EN
     SHOW_VIDEOS_PLAYLIST
 from common.utils import no_icon_image_public_url
 from create_rich_menu import create_rich_menu
-from repositories.mongo_repository import find_recent_events, insert_event, find_all_events, delete_event
+from repositories.mongo_repository import find_recent_events, insert_event, find_all_events, delete_event, update_event
 from repositories.youtube_repository import refresh_token_if_expired, get_my_recent_videos
 from services.ngrok_service import connect_http_tunnel
 from services.postback_service import select_entry_events_message, select_option_to_entry_message, entry_with_option, \
@@ -142,6 +142,16 @@ def events_register():
         end_hour=session.get('end_hour', 12),
         end_minute=session.get('end_minute', 0),
     )
+
+@app.route('/events/edit', methods=['POST'])
+def events_edit():
+    event_id = request.form['event_id']
+    location = request.form['location']
+    description = request.form['description']
+
+    update_event(ObjectId(event_id), {"place": location, "description": description})
+
+    return redirect(url_for('events_delete'))
 
 @app.route('/events/delete', methods=['GET', 'POST'])
 def events_delete():
