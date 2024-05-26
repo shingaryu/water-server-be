@@ -84,6 +84,7 @@ def events_register():
     if request.method == 'POST': # ボタンクリック時
         # ユーザーの入力状態をsessionに保存
         session['location'] = request.form.get('location', '◯◯体育館')
+        session['description'] = request.form.get('description', '説明を入力')
         session['selected_year'] = int(request.form.get('selected_year', datetime.now().year))
         session['selected_month'] = int(request.form.get('selected_month', (datetime.now().month % 12) + 1))
         session['selected_dayofweek'] = int(request.form.get('dayOfWeek', 6))
@@ -98,6 +99,7 @@ def events_register():
         if 'apply_button' in request.form:  # 選択した開催日を登録 クリック
             for date_str in selected_dates:
                 location = session.get('location', '◯◯体育館')
+                description = session.get('description', '説明を入力')
                 start_hour = session.get('start_hour', 0)
                 start_minute = session.get('start_minute', 0)
                 end_hour = session.get('end_hour', 0)
@@ -112,6 +114,7 @@ def events_register():
                     "startTime": start_time,
                     "endTime": end_time,
                     "place": location,
+                    "description": description,
                     "entryOptions": [
                         {"id": "1", "text": "参加"},
                         {"id": "2", "text": "途中参加"},
@@ -129,6 +132,7 @@ def events_register():
     # GETリクエスト(ページ読み込み時)
     return render_template('events_register.html',
         place=session.get('location', '◯◯体育館'),
+        description=session.get('description', '説明を入力'),
         selected_year=session.get('selected_year', datetime.now().year),
         selected_month = session.get('selected_month', (datetime.now().month % 12) + 1),
         selected_dayofweek = session.get('selected_dayofweek', 6),

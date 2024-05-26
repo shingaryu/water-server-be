@@ -2,6 +2,7 @@ from common.consts import ENTRY_WITH_OPTION, ENTRY_WITH_OPTION_EVENT, ENTRY_WITH
 from common.utils import format_date, no_icon_image_public_url
 
 WATER_COOLER_BLUE = "#007AFF"
+WATER_COOLER_LOGO_BACKGROUND = "#f3f2f8FF"
 MIDNIGHT_BLUE = "#001E43"
 FROSTY_BLUE = "#BBDBF3"
 SMOKE_BLUE = "#A4C1D7"
@@ -25,6 +26,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
         total_count += len(attendees)
 
     gym_img_url = load_gym_img_url(event)
+    offset_bottom_hero = 40
 
     # 注: entry_option_status内の要素は順序を保証しない(例: "id":2 のoptionが先頭に来る場合もある)が、create_attendees_listの返り値は順序を保証している
     attendees_list, n_registered_list = create_attendees_list(entry_option_status)
@@ -65,14 +67,42 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
             "layout": "vertical",
             "contents": [
                 {
-                    "type": "image",
-                    "size": "full",
-                    "aspectRatio": "32:9",
-                    "aspectMode": "cover",
-                    "position": "absolute",
-                    "offsetTop": "0px",
-                    "offsetStart": "0px",
-                    "url": gym_img_url
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "image",
+                            "size": "full",
+                            "aspectRatio": "32:9",
+                            "aspectMode": "cover",
+                            "position": "absolute",
+                            "offsetTop": "0px",
+                            "offsetStart": "0px",
+                            "url": gym_img_url
+                        },
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": event["place"],
+                                    "color": SNOW_WHITE,
+                                    "weight": "regular",
+                                }
+
+                            ],
+                            "position": "absolute",
+                            "backgroundColor": MIDNIGHT_BLUE + "AA",
+                            "cornerRadius": "xxl",
+                            "alignItems": "center",
+                            "width": "150px",
+                            "height": "20px",
+                            "offsetEnd": "-15px",
+                            "offsetTop": "10px"
+                        },
+                    ],
+                    "height": "80px"
                 },
                 {
                     "type": "box",
@@ -80,23 +110,20 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
                     "contents": [
                         {
                             "type": "text",
-                            "text": event["place"],
+                            "text": event.get("description") or "(説明はありません)",
                             "color": SNOW_WHITE,
-                            "weight": "regular",
+                            "wrap": True,
+                            "size": "sm"
                         }
-
                     ],
-                    "position": "absolute",
                     "backgroundColor": MIDNIGHT_BLUE + "AA",
-                    "cornerRadius": "xxl",
-                    "alignItems": "center",
-                    "width": "150px",
-                    "height": "20px",
-                    "offsetEnd": "-15px",
-                    "offsetTop": "10px"
-                },
+                    "cornerRadius": "lg",
+                    "paddingStart": "22px",
+                    "paddingEnd": "22px",
+                    "offsetBottom": f"{str(offset_bottom_hero)}px"
+                }
             ],
-            "height": "80px"
+            "backgroundColor": WATER_COOLER_LOGO_BACKGROUND,
         }
     }
     registered_block = {
@@ -337,6 +364,7 @@ def select_option_to_entry_flex_contents(event, entry_option_status):
         "body": {
             "type": "box",
             "layout": "vertical",
+            # "offsetBottom": f"{str(offset_bottom_hero)}px", # こうすると、body要素の上から{offset_bottom_hero}pxの領域が隠れてしまう(ちょうど「登録状況」行が隠れる)
             "contents": [
                 {
                     "type": "image",

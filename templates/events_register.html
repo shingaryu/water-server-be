@@ -43,6 +43,10 @@
             <input type="text" class="form-control" id="location" name="location" value="{{ place }}" required>
         </div>
         <div class="form-group">
+            <label for="description">説明</label>
+            <input type="text" class="form-control" id="description" name="description" value="{{ description }}" required>
+        </div>
+        <div class="form-group">
             <div class="form-group">
                 <label for="dayOfWeek">曜日を選択</label>
                 <select class="form-control" id="dayOfWeek" name="dayOfWeek" onchange="submitForm()">
@@ -103,9 +107,9 @@
     </form>
 </div>
 <script>
-function submitForm() {
-    document.querySelector('form').submit();  // フォームを送信
-}
+    function submitForm() {
+        document.querySelector('form').submit();  // フォームを送信
+    }
 </script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
