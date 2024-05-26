@@ -107,6 +107,16 @@
     </form>
 </div>
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('input').forEach(function(input) {
+            input.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                }
+            });
+        });
+    });
+
     function submitForm() {
         document.querySelector('form').submit();  // フォームを送信
     }
