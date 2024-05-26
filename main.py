@@ -144,7 +144,7 @@ def events_delete():
     if request.method == 'POST':
         if 'delete_event' in request.form:
             event_id = request.form['delete_event']
-            delete_event(ObjectId(event_id))
+            delete_event(ObjectId(event_id), True)
             return redirect(url_for('events_delete'))
 
     events = find_all_events(ascending=True)
