@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開催日を登録</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        select.year-select {
+            width: 90px;
+        }
+        select.month-select {
+            width: 90px;
+        }
+        select.time-select {
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>開催日を登録</h2>
+        <a href="/events/delete">開催日の管理</a>
+    </div>
+    <form method="POST">
+        <div class="form-group d-flex align-items-center">
+            <select class="form-control mx-2 year-select" name="selected_year" onchange="submitForm()">
+                {% for year in range(2021, 2031) %}
+                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+            <label>年</label>
+            <select class="form-control mx-2 month-select" name="selected_month" onchange="submitForm()">
+                {% for month in range(1, 13) %}
+                <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}</option>
+                {% endfor %}
+            </select>
+            <label>月</label>
+        </div>
+        <div class="form-group">
+            <label for="location">場所(自由記述)</label>
+            <input type="text" class="form-control" id="location" name="location" value="{{ place }}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">説明(自由記述)</label>
+            <input type="text" class="form-control" id="description" name="description" value="{{ description }}" required>
+        </div>
+        <div class="form-group">
+            <div class="form-group">
+                <label for="dayOfWeek">曜日を選択</label>
+                <select class="form-control" id="dayOfWeek" name="dayOfWeek" onchange="submitForm()">
+                    <option value="0" {% if 0 == selected_dayofweek %}selected{% endif %}>月曜日</option>
+                    <option value="1" {% if 1 == selected_dayofweek %}selected{% endif %}>火曜日</option>
+                    <option value="2" {% if 2 == selected_dayofweek %}selected{% endif %}>水曜日</option>
+                    <option value="3" {% if 3 == selected_dayofweek %}selected{% endif %}>木曜日</option>
+                    <option value="4" {% if 4 == selected_dayofweek %}selected{% endif %}>金曜日</option>
+                    <option value="5" {% if 5 == selected_dayofweek %}selected{% endif %}>土曜日</option>
+                    <option value="6" {% if 6 == selected_dayofweek %}selected{% endif %}>日曜日</option>
+                </select>
+            </div>
+            {% if dates %}
+                <div class="form-group mt-2">
+                    <label>選択可能な日付:</label>
+                    <div>
+                        {% for date in dates %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="selected_dates" value="{{ date }}">
+                            <label class="form-check-label">{{ date }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <label>時間</label>
+        <div class="form-group d-flex align-items-center">
+            <select class="form-control time-select" name="start_hour">
+                {% for hour in range(24) %}
+                <option value="{{ hour }}" {% if hour == start_hour %}selected{% endif %}>{{ hour }}</option>
+                {% endfor %}
+            </select>
+            <label>時</label>
+            <select class="form-control time-select" name="start_minute">
+                {% for minute in range(60) %}
+                <option value="{{ minute }}" {% if minute == start_minute %}selected{% endif %}>{{ minute }}</option>
+                {% endfor %}
+            </select>
+            <label>分</label>
+            <label>～</label>
+            <select class="form-control time-select" name="end_hour">
+                {% for hour in range(24) %}
+                <option value="{{ hour }}" {% if hour == end_hour %}selected{% endif %}>{{ hour }}</option>
+                {% endfor %}
+            </select>
+            <label>時</label>
+            <select class="form-control time-select" name="end_minute">
+                {% for minute in range(60) %}
+                <option value="{{ minute }}" {% if minute == end_minute %}selected{% endif %}>{{ minute }}</option>
+                {% endfor %}
+            </select>
+            <label>分</label>
+        </div>
+        <div>
+            <button type="submit" name="apply_button" class="btn btn-primary ">開催日を登録</button>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('input').forEach(function(input) {
+            input.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                }
+            });
+        });
+    });
+
+    function submitForm() {
+        document.querySelector('form').submit();  // フォームを送信
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -16,11 +16,6 @@ scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 api_service_name = "youtube"
 api_version = "v3"
 
-if os.path.exists('token.json'):
-    creds = Credentials.from_authorized_user_file('token.json', scopes)
-else:
-    raise Exception("token.jsonがありません。")
-
 
 def refresh_token_if_expired():
     if not creds.expired:
@@ -34,11 +29,23 @@ def refresh_token_if_expired():
     logger.debug("token refresh completed")
 
 
-refresh_token_if_expired()
-youtube = build(api_service_name, api_version, credentials=creds)
+youtube_disabled = os.environ.get('IS_YOUTUBE_FEATURE_DISABLED') is not None
+if youtube_disabled:
+    logger.info("YouTube機能は無効化されています。")
+else:
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', scopes)
+    else:
+        raise Exception("token.jsonがありません。")
+
+    refresh_token_if_expired()
+    youtube = build(api_service_name, api_version, credentials=creds)
 
 
 def get_my_recent_videos():
+    if youtube_disabled:
+        raise Exception("YouTube機能が無効化されているため、この関数は実行できません。")
+
     logger.info("get my recent videos...")
     refresh_token_if_expired()
     request = youtube.search().list(
@@ -55,6 +62,9 @@ def get_my_recent_videos():
 
 
 def get_my_playlists():
+    if youtube_disabled:
+        raise Exception("YouTube機能が無効化されているため、この関数は実行できません。")
+
     logger.info(f"get my playlists...")
     refresh_token_if_expired()
     request = youtube.playlists().list(
@@ -69,6 +79,9 @@ def get_my_playlists():
 
 
 def get_playlist_videos(playlist_id: str):
+    if youtube_disabled:
+        raise Exception("YouTube機能が無効化されているため、この関数は実行できません。")
+
     logger.info(f"get videos in playlist {playlist_id}...")
     refresh_token_if_expired()
     request = youtube.playlistItems().list(

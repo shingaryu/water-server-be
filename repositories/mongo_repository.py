@@ -34,9 +34,13 @@ def find_recent_events(n_items):
 
     return results
 
-def find_all_events():
+def find_all_events(ascending = False):
     logger.info('Find all events...')
-    results = list(events_collection.find())
+    events = events_collection.find()
+    if ascending:
+        events = events.sort("startTime", -1)
+
+    results = list(events)
 
     return results
 
@@ -137,6 +141,30 @@ def delete_entry(id):
     logger.debug(f'{result.deleted_count} document(s) deleted')
     return result
 
+def insert_event(document):
+    logger.info(f'Insert event...')
+    result = events_collection.insert_one(document)
+    logger.debug(f'New document id: {result.inserted_id}')
+    return result
+
+def delete_event(event_oid, delete_related_entries=True):
+    logger.info(f'Deleting event: {str(event_oid)}...')
+
+    if delete_related_entries:
+        # 関連するエントリーを削除
+        entry_filter = {"eventId": str(event_oid)}
+        entry_result = entries_collection.delete_many(entry_filter)
+        logger.info(f'{entry_result.deleted_count} related entry document(s) deleted')
+    else:
+        logger.info('No related entries deleted')
+
+    # イベントを削除
+    event_filter = {"_id": event_oid}
+    event_result = events_collection.delete_one(event_filter)
+    logger.info(f'{event_result.deleted_count} event document(s) deleted')
+
+    return event_result
+
 def update_event(oid, field_dict_to_update):
     logger.info(f'Update event {str(oid)} with {field_dict_to_update}...')
     filter = {"_id": oid}
@@ -145,6 +173,53 @@ def update_event(oid, field_dict_to_update):
     logger.debug(f'{result.matched_count} event(s) matched, {result.modified_count} event(s) modified')
     return result
 
+def get_orphaned_entries():
+    # Eventsコレクション内のすべてのイベントIDを取得
+    event_ids = events_collection.distinct('_id')
+    event_id_strs = [str(event_id) for event_id in event_ids]
+
+    # Entriesコレクション内の孤立したエントリーを特定
+    orphaned_entry_filter = {"eventId": {"$nin": event_id_strs}}
+    orphaned_entries_cursor = entries_collection.find(orphaned_entry_filter)
+
+    # Cursorをリストに変換
+    orphaned_entries = list(orphaned_entries_cursor)
+
+    return orphaned_entries
+
+# Entryが参照として持つEventの実体を検索し、Eventの実体が存在しないEntryをすべて削除する。デフォルトでは確認プロンプトを出す
+def list_and_delete_orphaned_entries(show_confirm=True):
+    logger.info('Listing orphaned entries...')
+
+    orphaned_entries = get_orphaned_entries()
+
+    if not orphaned_entries:
+        logger.info('No orphaned entries found')
+        return
+
+    logger.info(f'Found {len(orphaned_entries)} orphaned entry document(s)')
+    orphaned_entry_info = []
+    for entry in orphaned_entries:
+        entry_id = entry['_id']
+        creation_time = entry_id.generation_time
+        user_display_name = entry['user']['displayName']
+        event_id = entry['eventId']
+        orphaned_entry_info.append((entry_id, creation_time, user_display_name, event_id))
+        logger.info(f'Entry ID: {entry_id} ({creation_time}), User: {user_display_name}, Event ID: {event_id}')
+
+    if show_confirm:
+        user_input = input("Do you want to delete these orphaned entries? (y/n, default n): ")
+        if user_input.lower() in ('y', 'yes'):
+            delete_result = entries_collection.delete_many(
+                {"_id": {"$in": [entry_id for entry_id, _, _, _ in orphaned_entry_info]}})
+            logger.info(f'{delete_result.deleted_count} orphaned entry document(s) deleted')
+        else:
+            logger.info('Deletion cancelled by user.')
+    else:
+        delete_result = entries_collection.delete_many(
+            {"_id": {"$in": [entry_id for entry_id, _, _, _ in orphaned_entry_info]}})
+        logger.info(f'{delete_result.deleted_count} orphaned entry document(s) deleted')
+
 # if __name__ == '__main__':
-#     print('mongo_repository:main')
-#     find_recent_events(2)
+#     logger.info('mongo_repository:main')
+#     list_and_delete_orphaned_entries()
