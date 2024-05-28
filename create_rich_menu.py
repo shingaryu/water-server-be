@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, SHOW_VIDEOS, SHOW_MEMBERS
+from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, SHOW_VIDEOS, SHOW_MEMBERS, AKIO_BUTTON
 from services.ngrok_service import current_ngrok_public_url
 
 load_dotenv()
@@ -42,9 +42,20 @@ def create_rich_menu():
         selected=True,
         name="water-server-menu_" + now.strftime("%Y-%m-%d_%H-%M-%S"),
         chat_bar_text='メニュー',
-        areas=[RichMenuArea(
-            bounds=RichMenuBounds(x=(i % 3) * 833, y=(i // 3) * 843, width=833, height=843),
-            action=actions[i]) for i in range(6)]
+        areas=[
+            RichMenuArea(
+                bounds=RichMenuBounds(x=(i % 3) * 833, y=(i // 3) * 843, width=833, height=843),
+                action=actions[i]) for i in range(5)
+        ] + [
+            RichMenuArea(
+                bounds=RichMenuBounds(x=5 % 3 * 833, y=5 // 3 * 843, width=833, height=843 * 3 / 4), # 右下を除く3/4の領域
+                action=PostbackAction(data=f'{AKIO_BUTTON}', display_text='はやしあきお')
+            ),
+            RichMenuArea(
+                bounds=RichMenuBounds(x=5 % 3 * 833 + 833 * 3 / 4, y=5 // 3 * 843 + 843 * 3 / 4, width=833 / 4, height=843 / 4), # 右下1/4の領域(隠し機能とするため)
+                action=URIAction(uri=f'{current_ngrok_public_url()}/events/register', label='開催日の登録')
+            )
+        ]
     )
     rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
     logger.info(f'Rich menu created: {rich_menu_id}')
