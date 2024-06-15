@@ -63,7 +63,7 @@ def find_all_entries():
 # The returned dict contains only one same user for the event.
 # (e.g. There could be multiple entries for a user. like they updated their attendance.
 # This function returns only one user for them.)
-def find_all_members_in_the_event(event_id: ObjectId):
+def find_all_members_in_the_event(event_id: ObjectId) -> dict:
     id: str = str(event_id)
     
     entries: list = list(entries_collection.find({"eventId": id}))
@@ -88,15 +88,15 @@ class MemberInfo:
         self.firstEntryDateTime = firstEntryDateTime
         self.totalAttendance = totalAttendance
         
-    def setTotalAttendance(self, totalAttendance:int):
+    def setTotalAttendance(self, totalAttendance:int) ->None:
         self.totalAttendance = totalAttendance
         
-    def setFirstEntryDateTime(self, firstEntryDateTime: datetime):
+    def setFirstEntryDateTime(self, firstEntryDateTime: datetime) ->None:
         self.firstEntryDateTime = firstEntryDateTime
 
 # key: string class. User's objectID from MongoDB
 # Value: MemberInfo class.
-def generate_member_info_dict(events: list):
+def generate_member_info_dict(events: list) -> dict[str, MemberInfo]:
     results: dict = dict()
     for event in events:
         event_id: ObjectId = event["_id"]
