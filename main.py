@@ -3,10 +3,10 @@ import ssl
 
 from dotenv import load_dotenv
 
-from create_rich_menu import create_rich_menu
+from services.create_rich_menu import create_rich_menu
 from services.ngrok_service import connect_http_tunnel
 from services.remind_service import REMIND_INTERVAL_MIN, REMIND_SOONER_THAN_HOURS, remind_closest_event
-from set_webhook_url import set_webhook_url
+from services.set_webhook_url import set_webhook_url
 
 load_dotenv()
 

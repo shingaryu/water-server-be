@@ -13,8 +13,8 @@ import datetime
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 
-# 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ず同ディレクトリで実行すること
-RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
+# 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ずソースディレクトリのRootで実行すること
+RICH_MENU_IMAGE_PATH = "./static/richmenu_image.jpg"
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
