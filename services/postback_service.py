@@ -1,5 +1,4 @@
 import os
-from bson import ObjectId
 from linebot.models import FlexSendMessage, TextSendMessage, CarouselTemplate, CarouselColumn, URIAction, \
     TemplateSendMessage, QuickReply, QuickReplyButton, PostbackAction
 
@@ -9,9 +8,9 @@ from common.utils import no_icon_image_public_url
 from repositories.youtube_repository import get_my_recent_videos, get_playlist_videos, get_my_playlists
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
     insert_entry, delete_entry, generate_member_info_dict, MemberInfo
-from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
-from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
-from templates.show_members_template import member_contents, member_list_bubble
+from line_message_templates.select_entry_events_template import event_flex_contents, select_event_message_contents
+from line_message_templates.select_option_to_entry_template import select_option_to_entry_flex_contents
+from line_message_templates.show_members_template import member_contents, member_list_bubble
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 

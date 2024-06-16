@@ -6,7 +6,7 @@ import pymongo
 from pymongo import MongoClient
 
 from common.get_logger import get_logger
-from templates.select_option_to_entry_template import ENTRY_OPTION_ID_ATTEND, ENTRY_OPTION_ID_HALFWAY
+from line_message_templates.select_option_to_entry_template import ENTRY_OPTION_ID_ATTEND, ENTRY_OPTION_ID_HALFWAY
 
 load_dotenv()
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
