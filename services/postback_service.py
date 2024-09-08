@@ -143,7 +143,7 @@ def entry_with_option(event_id, option_id, user):
 
 
 def videos_quick_reply_obj():
-    playlists = get_my_playlists()
+    playlists = get_my_playlists()[:12]  # maximum items in quick reply: 13
     items = [
         QuickReplyButton(
             action=PostbackAction(label="全部", data=f"{SHOW_VIDEOS}")
