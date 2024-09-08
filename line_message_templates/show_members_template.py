@@ -2,7 +2,7 @@ from common.utils import no_icon_image_public_url
 
 LOGO_BACKGROUND_COLOR = "#F3F2F9"
 
-def member_contents(name: str, image_url: str, total_attendance: str, normalized_attendance: float):
+def member_contents(name: str, image_url: str, total_attendance: str, normalized_attendance: float) ->dict:
     contents: dict = {
         "type": "box",
         "layout": "horizontal",
@@ -65,7 +65,7 @@ def member_contents(name: str, image_url: str, total_attendance: str, normalized
     return contents
 
 
-def member_list_bubble(header_title: str, member_contents: list):
+def member_list_bubble(header_title: str, member_contents: list) -> dict:
     bubble: dict = {
         "type": "bubble",
         "size": "mega",

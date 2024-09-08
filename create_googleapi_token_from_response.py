@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta
 
-with open('credentials_web_flow.json', 'r') as file:
+with open('scripts/credentials_web_flow.json', 'r') as file:
     credentials = json.load(file)
 
 with open('playground_response.json', 'r') as file:

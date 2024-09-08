@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from linebot.constants import PostbackInputOption
 
 from common.consts import SHOW_EVENTS, SHOW_NEXT_EVENT, SHOW_VIDEOS, SHOW_MEMBERS, AKIO_BUTTON
 from services.ngrok_service import current_ngrok_public_url
@@ -13,18 +14,18 @@ import datetime
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
 
-# 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ず同ディレクトリで実行すること
-RICH_MENU_IMAGE_PATH = "richmenu_image.jpg"
+# 実行ディレクトリからの相対パスとして解釈されるため、本スクリプトは必ずソースディレクトリのRootで実行すること
+RICH_MENU_IMAGE_PATH = "./static/richmenu_image.jpg"
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 def create_rich_menu():
     actions = [
-        PostbackAction(data=f'{SHOW_NEXT_EVENT}', display_text='参加登録'),
-        PostbackAction(data=f'{SHOW_EVENTS}', display_text='開催日一覧'),
-        PostbackAction(data=f'{SHOW_MEMBERS}', display_text='メンバーリスト'),
-        PostbackAction(data=f'richmenu/?area=3', display_text='bWVtYmVyIGxpc3Q='),
-        PostbackAction(data=f'{SHOW_VIDEOS}', display_text='ムービー'),
+        PostbackAction(data=f'{SHOW_NEXT_EVENT}', display_text='参加登録', input_option=PostbackInputOption.CLOSE_RICH_MENU),
+        PostbackAction(data=f'{SHOW_EVENTS}', display_text='開催日一覧', input_option=PostbackInputOption.CLOSE_RICH_MENU),
+        PostbackAction(data=f'{SHOW_MEMBERS}', display_text='メンバーリスト', input_option=PostbackInputOption.CLOSE_RICH_MENU),
+        PostbackAction(data=f'richmenu/?area=3', display_text='bWVtYmVyIGxpc3Q=', input_option=PostbackInputOption.CLOSE_RICH_MENU),
+        PostbackAction(data=f'{SHOW_VIDEOS}', display_text='ムービー', input_option=PostbackInputOption.CLOSE_RICH_MENU),
         URIAction(uri=f'{current_ngrok_public_url()}/events/register', label='開催日の登録')
     ]
 
@@ -49,7 +50,7 @@ def create_rich_menu():
         ] + [
             RichMenuArea(
                 bounds=RichMenuBounds(x=5 % 3 * 833, y=5 // 3 * 843, width=833, height=843 * 3 / 4), # 右下を除く3/4の領域
-                action=PostbackAction(data=f'{AKIO_BUTTON}', display_text='はやしあきお')
+                action=PostbackAction(data=f'{AKIO_BUTTON}', display_text='はやしあきお', input_option=PostbackInputOption.CLOSE_RICH_MENU)
             ),
             RichMenuArea(
                 bounds=RichMenuBounds(x=5 % 3 * 833 + 833 * 3 / 4, y=5 // 3 * 843 + 843 * 3 / 4, width=833 / 4, height=843 / 4), # 右下1/4の領域(隠し機能とするため)

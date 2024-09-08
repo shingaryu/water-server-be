@@ -9,8 +9,8 @@ load_dotenv()
 
 import os
 from common.get_logger import get_logger
-from set_webhook_url import set_webhook_url
-from create_rich_menu import create_rich_menu
+from services.set_webhook_url import set_webhook_url
+from services.create_rich_menu import create_rich_menu
 from main import app, port_to_serve
 from waitress import serve
 

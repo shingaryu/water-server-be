@@ -1,5 +1,4 @@
 import os
-from bson import ObjectId
 from linebot.models import FlexSendMessage, TextSendMessage, CarouselTemplate, CarouselColumn, URIAction, \
     TemplateSendMessage, QuickReply, QuickReplyButton, PostbackAction
 
@@ -9,9 +8,9 @@ from common.utils import no_icon_image_public_url
 from repositories.youtube_repository import get_my_recent_videos, get_playlist_videos, get_my_playlists
 from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
     insert_entry, delete_entry, generate_member_info_dict, MemberInfo
-from templates.select_entry_events_template import event_flex_contents, select_event_message_contents
-from templates.select_option_to_entry_template import select_option_to_entry_flex_contents
-from templates.show_members_template import member_contents, member_list_bubble
+from line_message_templates.select_entry_events_template import event_flex_contents, select_event_message_contents
+from line_message_templates.select_option_to_entry_template import select_option_to_entry_flex_contents
+from line_message_templates.show_members_template import member_contents, member_list_bubble
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
@@ -24,7 +23,7 @@ def show_recent_event_message():
     else:
         return select_option_to_entry_message(events[0]["_id"])
 
-def show_members_message():
+def show_members_message() -> list[FlexSendMessage]:       
     members_info: dict[str, MemberInfo] = generate_member_info_dict(find_all_events())
 
     #TODO Calculate the appearance (Appearance/The total events)
@@ -144,7 +143,7 @@ def entry_with_option(event_id, option_id, user):
 
 
 def videos_quick_reply_obj():
-    playlists = get_my_playlists()
+    playlists = get_my_playlists()[:12]  # maximum items in quick reply: 13
     items = [
         QuickReplyButton(
             action=PostbackAction(label="全部", data=f"{SHOW_VIDEOS}")
