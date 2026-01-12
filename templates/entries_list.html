@@ -36,9 +36,9 @@
 </head>
 <body>
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
         <h2>参加登録の管理</h2>
-        <div>
+        <div class="d-flex flex-column flex-md-row">
             <a href="/events/register" class="mr-2">開催日の登録</a>
             <a href="/events/list">開催日の管理</a>
         </div>
@@ -57,7 +57,7 @@
                 <input type="text" class="form-control" id="editUserName" disabled>
             </div>
             <div class="form-group">
-                <label for="editSelectedOptionId">selectedOptionId(1~3)</label>
+                <label for="editSelectedOptionId">1: 参加, 2: 途中参加, 3: 不参加</label>
                 <select class="form-control" id="editSelectedOptionId" name="selected_option_id" required>
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -78,7 +78,7 @@
                 <div>{{ entry.user_name }}</div>
             </div>
             <div class="entry-field">
-                <div class="text-muted small">selectedOptionId(1~3)</div>
+                <div class="text-muted small">1: 参加, 2: 途中参加, 3: 不参加</div>
                 <div>{{ entry.option_id }}</div>
             </div>
         </div>
