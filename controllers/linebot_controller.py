@@ -83,7 +83,8 @@ def postback(line_event):
             option_id = query_params.get(ENTRY_WITH_OPTION_OPTION)[0]
             profile = line_bot_api.get_profile(line_event.source.user_id)
             message = entry_with_option(event_id, option_id, profile)
-            line_bot_api.reply_message(line_event.reply_token, message)
+            updated_flex_message = select_option_to_entry_message(ObjectId(event_id))
+            line_bot_api.reply_message(line_event.reply_token, [message, updated_flex_message])
         elif (event_name == SHOW_VIDEOS):
             playlist_id = query_params.get(SHOW_VIDEOS_PLAYLIST)[0] if query_params.get(SHOW_VIDEOS_PLAYLIST) else None
             if playlist_id is not None:
