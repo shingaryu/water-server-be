@@ -6,8 +6,8 @@ from common.consts import SELECT_EVENT_TO_ENTRY, SELECT_EVENT_TO_ENTRY_EVENT, SH
 from common.get_logger import get_logger
 from common.utils import no_icon_image_public_url
 from repositories.youtube_repository import get_my_recent_videos, get_playlist_videos, get_my_playlists
-from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, find_entry, \
-    insert_entry, delete_entry, generate_member_info_dict, MemberInfo
+from repositories.mongo_repository import find_recent_events, find_all_events, find_all_entries, find_event, \
+    upsert_entry, generate_member_info_dict, MemberInfo
 from line_message_templates.select_entry_events_template import event_flex_contents, select_event_message_contents
 from line_message_templates.select_option_to_entry_template import select_option_to_entry_flex_contents
 from line_message_templates.show_members_template import member_contents, member_list_bubble
@@ -127,16 +127,10 @@ def entry_with_option(event_id, option_id, user):
         "selectedOptionId": option_id
     }
 
-    user_entry = find_entry(event_id, user.user_id)
-    message = None
-    if user_entry:
-        # delete existing
-        delete_entry(user_entry["_id"])
-        result = insert_entry(document_data)
-
+    result = upsert_entry(event_id, user.user_id, document_data)
+    if result.upserted_id is None:
         message = TextSendMessage(text=f'再投票しました。')
     else:
-        result = insert_entry(document_data)
         message = TextSendMessage(text=f'投票しました。')
 
     return message

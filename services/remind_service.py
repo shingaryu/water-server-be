@@ -15,8 +15,8 @@ REMIND_SOONER_THAN_HOURS = 24
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
 
 
-# 指定した時間差time_differenceがh時間m分s秒以内か判断するプログラム
-def is_over_n_hours(time_difference, h, m, s):
+def is_within_time(time_difference, h, m, s):
+    """Return True if ``time_difference`` is within ``h`` hours, ``m`` minutes, and ``s`` seconds."""
     time_hms = timedelta(hours=h, minutes=m, seconds=s)
     return time_difference <= time_hms
 
@@ -45,7 +45,7 @@ def remind_closest_event(line_bot_api):
     logger.debug(f'リマインド済み: {isRemindedFlag}')
 
     # 直近のイベント時刻までの時間がREMIND_SOONER_THAN_HOURS時間以内且つリマインド済みでない場合にメッセージと投票状況を送信
-    if is_over_n_hours(delta_time, REMIND_SOONER_THAN_HOURS, 0, 0) and not isRemindedFlag:
+    if is_within_time(delta_time, REMIND_SOONER_THAN_HOURS, 0, 0) and not isRemindedFlag:
             # (a)メッセージ送信 -> (b)MongoDBへの保存 の順番だと、(b)だけ失敗する状況でメッセージが送られ続けてしまうので、(b) -> (a)の順番にしておく
             # イベントにリマインド済みフラグを設定
             logger.debug('イベントにリマインド済みフラグを設定...')

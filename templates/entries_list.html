@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>参加登録の管理</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .entry-controls {
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .entry-controls button {
+            margin-left: 5px;
+        }
+        .entry-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .entry-fields {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .entry-field {
+            min-width: 140px;
+        }
+        .entry-event {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+        <h2>参加登録の管理</h2>
+        <div class="d-flex flex-column flex-md-row">
+            <a href="/events/register" class="mr-2">開催日の登録</a>
+            <a href="/events/list">開催日の管理</a>
+        </div>
+    </div>
+
+    <div id="editForm" style="display:none;" class="mb-3">
+        <h3>編集</h3>
+        <form method="POST" action="/entries/edit">
+            <input type="hidden" id="editEntryId" name="entry_id">
+            <div class="form-group">
+                <label for="editEventLabel">開催日</label>
+                <input type="text" class="form-control" id="editEventLabel" disabled>
+            </div>
+            <div class="form-group">
+                <label for="editUserName">ユーザー</label>
+                <input type="text" class="form-control" id="editUserName" disabled>
+            </div>
+            <div class="form-group">
+                <label for="editSelectedOptionId">1: 参加, 2: 途中参加, 3: 不参加</label>
+                <select class="form-control" id="editSelectedOptionId" name="selected_option_id" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">更新</button>
+            <button type="button" class="btn btn-secondary" onclick="hideEditForm()">キャンセル</button>
+        </form>
+    </div>
+
+    {% for entry in entries %}
+    <div class="entry-container">
+        <div class="entry-event mb-2">{{ entry.event_label }}</div>
+        <div class="entry-fields mb-2">
+            <div class="entry-field">
+                <div class="text-muted small">ユーザー名</div>
+                <div>{{ entry.user_name }}</div>
+            </div>
+            <div class="entry-field">
+                <div class="text-muted small">1: 参加, 2: 途中参加, 3: 不参加</div>
+                <div>{{ entry.option_id }}</div>
+            </div>
+        </div>
+        <div class="d-flex entry-controls">
+            <button type="button" class="btn btn-primary" onclick="showEditForm('{{ entry.entry_id }}', '{{ entry.event_label }}', '{{ entry.user_name }}', '{{ entry.option_id }}')">編集</button>
+            <form method="POST" action="/entries/delete" class="mb-0">
+                <input type="hidden" name="entry_id" value="{{ entry.entry_id }}">
+                <button type="submit" class="btn btn-danger">削除</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+    function showEditForm(entryId, eventLabel, userName, optionId) {
+        document.getElementById('editEntryId').value = entryId;
+        document.getElementById('editEventLabel').value = eventLabel;
+        document.getElementById('editUserName').value = userName;
+        document.getElementById('editSelectedOptionId').value = optionId;
+        document.getElementById('editForm').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    function hideEditForm() {
+        document.getElementById('editForm').style.display = 'none';
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

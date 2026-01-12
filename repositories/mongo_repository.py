@@ -127,10 +127,12 @@ def find_entry(event_id, user_id):
 
     return entry
 
-def insert_entry(document):
-    logger.info(f'Insert entry...')
-    result = entries_collection.insert_one(document)
-    logger.debug(f'New document id: {result.inserted_id}')
+def upsert_entry(event_id, user_id, document):
+    logger.info(f'Upsert entry with event_id: {event_id}, user id: {user_id}...')
+    filter = {"eventId": event_id, "user.userId": user_id}
+    update = {'$set': document}
+    result = entries_collection.update_one(filter, update, upsert=True)
+    logger.debug(f'{result.matched_count} entry(ies) matched, {result.modified_count} entry(ies) modified, upserted_id={result.upserted_id}')
     return result
 
 def delete_entry(id):
@@ -139,6 +141,14 @@ def delete_entry(id):
     result = entries_collection.delete_one(filter)
 
     logger.debug(f'{result.deleted_count} document(s) deleted')
+    return result
+
+def update_entry_option(oid, selected_option_id):
+    logger.info(f'Update entry {str(oid)} with selectedOptionId={selected_option_id}...')
+    filter = {"_id": oid}
+    update = {'$set': {"selectedOptionId": selected_option_id}}
+    result = entries_collection.update_one(filter, update)
+    logger.debug(f'{result.matched_count} entry(ies) matched, {result.modified_count} entry(ies) modified')
     return result
 
 def insert_event(document):

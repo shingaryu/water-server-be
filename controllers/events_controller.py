@@ -15,9 +15,15 @@ def generate_dates(year, month, weekday):
     return dates
 
 @events_bp.route('/events')
+@events_bp.route('/events/calendar')
 def show_events():
     events = find_recent_events(30)
-    return render_template('events.html', events=events)
+    return render_template('events_calendar.html', events=events)
+
+@events_bp.route('/events/list', methods=['GET'])
+def events_list():
+    events = find_all_events(ascending=True)
+    return render_template('events_list.html', events=events)
 
 @events_bp.route('/events/register', methods=['GET', 'POST'])
 def events_register():
@@ -86,15 +92,10 @@ def events_edit():
 
     update_event(ObjectId(event_id), {"place": location, "description": description})
 
-    return redirect(url_for('events.events_delete'))
+    return redirect(url_for('events.events_list'))
 
-@events_bp.route('/events/delete', methods=['GET', 'POST'])
+@events_bp.route('/events/delete', methods=['POST'])
 def events_delete():
-    if request.method == 'POST':
-        if 'delete_event' in request.form:
-            event_id = request.form['delete_event']
-            delete_event(ObjectId(event_id), True)
-            return redirect(url_for('events.events_delete'))
-
-    events = find_all_events(ascending=True)
-    return render_template('events_delete.html', events=events)
+    event_id = request.form['delete_event']
+    delete_event(ObjectId(event_id), True)
+    return redirect(url_for('events.events_list'))
