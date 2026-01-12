@@ -141,6 +141,14 @@ def delete_entry(id):
     logger.debug(f'{result.deleted_count} document(s) deleted')
     return result
 
+def update_entry_option(oid, selected_option_id):
+    logger.info(f'Update entry {str(oid)} with selectedOptionId={selected_option_id}...')
+    filter = {"_id": oid}
+    update = {'$set': {"selectedOptionId": selected_option_id}}
+    result = entries_collection.update_one(filter, update)
+    logger.debug(f'{result.matched_count} entry(ies) matched, {result.modified_count} entry(ies) modified')
+    return result
+
 def insert_event(document):
     logger.info(f'Insert event...')
     result = events_collection.insert_one(document)

@@ -17,6 +17,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from controllers.root_controller import root_bp
 from controllers.linebot_controller import linebot_bp
 from controllers.events_controller import events_bp
+from controllers.entries_controller import entries_bp
 from controllers.movies_controller import movies_bp
 
 logger = get_logger(__name__, os.environ.get("LOGGER_LEVEL"))
@@ -28,6 +29,7 @@ app.secret_key = 'your_secret_key'  # セッションを安全に使うための
 app.register_blueprint(root_bp)
 app.register_blueprint(linebot_bp)
 app.register_blueprint(events_bp)
+app.register_blueprint(entries_bp)
 app.register_blueprint(movies_bp)
 
 line_bot_api = get_line_bot_client()
