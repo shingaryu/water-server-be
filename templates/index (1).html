@@ -1,0 +1,2862 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>バドミントンダブルス記録</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #637083;
+      --line: #d8dee8;
+      --soft: #f4f7fb;
+      --panel: #ffffff;
+      --brand: #123047;
+      --brand-2: #28566f;
+      --green: #18794e;
+      --green-bg: #e4f5ec;
+      --red: #b4232f;
+      --red-bg: #fde8e8;
+      --amber: #87620a;
+      --amber-bg: #fff4cf;
+      --focus: #2f6fed;
+      --shadow: 0 10px 24px rgba(23, 32, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      color: var(--ink);
+      background: #eef2f7;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
+      outline-offset: 2px;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(18, 48, 71, 0.98), rgba(40, 86, 111, 0.98)),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .topbar-inner {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 18px clamp(14px, 3vw, 28px);
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(20px, 2.5vw, 30px);
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .match-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .field {
+      display: grid;
+      gap: 4px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .topbar .field label {
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    select,
+    input[type="text"] {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 10px;
+    }
+
+    .topbar select,
+    .topbar input[type="text"] {
+      min-width: min(360px, 72vw);
+      border-color: rgba(255, 255, 255, 0.28);
+      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.14);
+    }
+
+    .icon-button,
+    .text-button {
+      min-height: 38px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .icon-button {
+      width: 38px;
+      padding: 0;
+    }
+
+    .primary {
+      color: #fff;
+      background: #2f6fed;
+    }
+
+    .ghost {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .plain {
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .danger {
+      color: #fff;
+      background: var(--red);
+    }
+
+    .tabs {
+      background: #dfe6ef;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tabs-inner {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 8px clamp(14px, 3vw, 28px);
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      min-height: 38px;
+      border-radius: 8px;
+      padding: 0 14px;
+      color: var(--ink);
+      background: transparent;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tab[aria-selected="true"] {
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    main {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 18px clamp(14px, 3vw, 28px) 34px;
+      flex: 1;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .participant-panel {
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .participant-grid {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 64px;
+      border-radius: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      padding: 12px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .metric-value {
+      font-size: clamp(22px, 3.4vw, 34px);
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .metric-members {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      min-height: 1.2em;
+      overflow-wrap: anywhere;
+    }
+
+    .board-shell,
+    .table-shell,
+    .settings-shell {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .toolbar {
+      min-height: 52px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .toolbar h2,
+    .settings-block h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .scroll-x {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    th,
+    td {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 4px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #edf2f8;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    td {
+      background: #fff;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: 0;
+    }
+
+    .sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      min-width: 96px;
+      text-align: left;
+      box-shadow: 1px 0 0 var(--line);
+    }
+
+    th.sticky-left {
+      z-index: 3;
+    }
+
+    .player-name {
+      font-weight: 900;
+      background: #f8fafc;
+    }
+
+    .play-head {
+      min-width: 58px;
+      max-width: 68px;
+      line-height: 1.15;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .record-cell {
+      min-width: 58px;
+      display: grid;
+      gap: 3px;
+    }
+
+    .score-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+
+    .score-buttons.single,
+    .cell-counts.single {
+      grid-template-columns: 1fr;
+    }
+
+    .score-button {
+      min-width: 26px;
+      height: 24px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .score-button.course {
+      font-size: 11px;
+    }
+
+    .score-button.plus {
+      color: var(--green);
+      background: var(--green-bg);
+      border: 1px solid #b6e2c8;
+    }
+
+    .score-button.minus {
+      color: var(--red);
+      background: var(--red-bg);
+      border: 1px solid #f2b8bd;
+    }
+
+    .cell-counts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .input-flow {
+      min-width: 780px;
+      display: grid;
+      grid-template-columns: minmax(120px, 0.75fr) minmax(260px, 1.6fr) minmax(110px, 0.7fr) minmax(170px, 1fr) minmax(90px, 0.55fr);
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .selector-column {
+      min-height: 360px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      background: #fff;
+    }
+
+    .selector-column h3 {
+      margin: 0;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      background: #edf2f8;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .selector-list {
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      padding: 8px;
+      max-height: 440px;
+      overflow-y: auto;
+    }
+
+    .selector-list.level-major {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .selector-option {
+      width: 100%;
+      min-height: 36px;
+      border-radius: 8px;
+      padding: 7px 9px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.2;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+
+    .selector-option[aria-pressed="true"] {
+      color: #fff;
+      background: var(--brand);
+      border-color: var(--brand);
+    }
+
+    .result-actions {
+      display: grid;
+      gap: 8px;
+      padding: 8px;
+      align-content: start;
+    }
+
+    .result-button {
+      min-height: 54px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 950;
+    }
+
+    .result-button.plus {
+      color: var(--green);
+      background: var(--green-bg);
+      border: 1px solid #b6e2c8;
+    }
+
+    .result-button.minus {
+      color: var(--red);
+      background: var(--red-bg);
+      border: 1px solid #f2b8bd;
+    }
+
+    .selection-chip {
+      min-height: 36px;
+      display: grid;
+      align-content: center;
+      gap: 2px;
+      border-radius: 8px;
+      padding: 7px 9px;
+      color: var(--muted);
+      background: #f8fafc;
+      border: 1px dashed var(--line);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .player-total {
+      min-width: 52px;
+      font-weight: 900;
+    }
+
+    .recent-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+      gap: 14px;
+      margin-top: 14px;
+      align-items: start;
+    }
+
+    .recent-table td,
+    .recent-table th {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .record-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .mini-button {
+      min-height: 30px;
+      border-radius: 8px;
+      padding: 0 9px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .flip {
+      color: var(--amber);
+      background: var(--amber-bg);
+      border: 1px solid #ead486;
+    }
+
+    .delete {
+      color: var(--red);
+      background: var(--red-bg);
+      border: 1px solid #f2b8bd;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 18px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .summary-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .wide-summary th {
+      min-width: 64px;
+    }
+
+    .wide-summary .play-group {
+      min-width: 120px;
+    }
+
+    .chart-shell {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .chart-body {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .trend-row {
+      display: grid;
+      grid-template-columns: minmax(92px, 150px) minmax(220px, 1fr) 54px;
+      gap: 10px;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .trend-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .trend-name {
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 900;
+      text-align: left;
+    }
+
+    .trend-bars {
+      display: grid;
+      gap: 5px;
+    }
+
+    .trend-bar-line {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) 34px;
+      gap: 6px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .trend-track {
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #edf2f7;
+    }
+
+    .trend-bar {
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .trend-bar.point {
+      background: var(--green);
+    }
+
+    .trend-bar.lost {
+      background: var(--red);
+    }
+
+    .trend-total {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stats-filter {
+      margin-bottom: 14px;
+    }
+
+    .stats-filter select {
+      min-width: min(320px, 100%);
+    }
+
+    .stats-grid .chart-shell.wide {
+      grid-column: 1 / -1;
+    }
+
+    .match-score-row {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) auto minmax(120px, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .match-score-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .match-pair {
+      display: grid;
+      gap: 3px;
+    }
+
+    .match-pair.right {
+      text-align: right;
+    }
+
+    .match-name {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .match-members {
+      font-size: 11px;
+      line-height: 1.2;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .match-score {
+      min-width: 86px;
+      text-align: center;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .player-compare-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 180px) minmax(220px, 1fr) minmax(120px, 190px);
+      gap: 10px;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .player-compare-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .compare-name {
+      display: grid;
+      gap: 3px;
+      font-weight: 950;
+      overflow-wrap: anywhere;
+    }
+
+    .compare-meta {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .insight-badges {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .insight-badge {
+      min-height: 22px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      display: inline-flex;
+      align-items: center;
+      color: var(--muted);
+      background: #f4f7fb;
+      border: 1px solid var(--line);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .insight-badge.point {
+      color: var(--green);
+      background: var(--green-bg);
+      border-color: #b6e2c8;
+    }
+
+    .insight-badge.lost {
+      color: var(--red);
+      background: var(--red-bg);
+      border-color: #f2b8bd;
+    }
+
+    .insight-badge.quiet {
+      color: var(--amber);
+      background: var(--amber-bg);
+      border-color: #ead486;
+    }
+
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+      gap: 12px;
+    }
+
+    .breakdown-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .breakdown-head {
+      min-height: 44px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      font-weight: 950;
+    }
+
+    .breakdown-total {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .breakdown-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .breakdown-sections {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 10px;
+      align-items: start;
+    }
+
+    .breakdown-section {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .breakdown-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .breakdown-section.point .breakdown-section-title {
+      color: var(--green);
+      background: var(--green-bg);
+    }
+
+    .breakdown-section.lost .breakdown-section-title {
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    .breakdown-empty {
+      color: var(--muted);
+      padding: 8px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .breakdown-row {
+      display: grid;
+      grid-template-columns: minmax(74px, 112px) minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid #edf2f7;
+      border-radius: 8px;
+    }
+
+    .breakdown-row.point {
+      background: color-mix(in srgb, var(--green-bg) 72%, #fff);
+      border-color: #b6e2c8;
+    }
+
+    .breakdown-row.lost {
+      background: color-mix(in srgb, var(--red-bg) 72%, #fff);
+      border-color: #f2b8bd;
+    }
+
+    .breakdown-play {
+      font-size: 11px;
+      line-height: 1.15;
+      font-weight: 900;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+
+    .breakdown-value {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) 34px;
+      gap: 6px;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .breakdown-value.point {
+      color: var(--green);
+    }
+
+    .breakdown-value.lost {
+      color: var(--red);
+    }
+
+    .breakdown-sign {
+      min-width: 28px;
+      padding: 2px 0;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .breakdown-value.point .breakdown-sign {
+      background: var(--green);
+    }
+
+    .breakdown-value.lost .breakdown-sign {
+      background: var(--red);
+    }
+
+    .course-note {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .number {
+      font-variant-numeric: tabular-nums;
+      font-weight: 850;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) minmax(280px, 1fr);
+      gap: 14px;
+    }
+
+    .settings-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .settings-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: #edf2f8;
+    }
+
+    .settings-body {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .form-row label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .player-add-form,
+    .player-edit-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .play-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .play-pill {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 0 10px;
+      font-weight: 850;
+    }
+
+    dialog {
+      border: 0;
+      border-radius: 8px;
+      box-shadow: 0 24px 70px rgba(23, 32, 51, 0.26);
+      padding: 0;
+      width: min(460px, calc(100vw - 28px));
+    }
+
+    dialog::backdrop {
+      background: rgba(23, 32, 51, 0.42);
+    }
+
+    .dialog-content {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .dialog-content h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .hidden-file {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .topbar-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .match-controls {
+        justify-content: flex-start;
+      }
+
+      .summary-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .recent-layout,
+      .settings-grid,
+      .participant-grid,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+    @media (max-width: 560px) {
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbar-actions {
+        justify-content: flex-start;
+      }
+
+      .topbar select,
+      .topbar input[type="text"] {
+        min-width: 100%;
+      }
+
+      .player-compare-row,
+      .breakdown-row {
+        grid-template-columns: 1fr;
+      }
+
+      .breakdown-sections {
+        grid-template-columns: 1fr;
+      }
+
+      .insight-badges {
+        justify-content: flex-start;
+      }
+
+      .match-score-row {
+        grid-template-columns: 1fr;
+      }
+
+      .match-pair.right {
+        text-align: left;
+      }
+
+      .match-score {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <h1>バドミントンダブルス記録</h1>
+        <div class="match-controls">
+          <div class="field">
+            <label for="matchSelect">試合</label>
+            <select id="matchSelect"></select>
+          </div>
+          <button class="icon-button primary" id="addMatchButton" type="button" title="試合を追加" aria-label="試合を追加">+</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="表示切替">
+      <div class="tabs-inner">
+        <button class="tab" type="button" data-view="record" aria-selected="true">入力</button>
+        <button class="tab" type="button" data-view="stats">統計</button>
+        <button class="tab" type="button" data-view="settings">設定</button>
+      </div>
+    </nav>
+
+    <main>
+      <section class="view active" id="view-record">
+        <div class="summary-strip" id="currentMetrics"></div>
+        <div class="participant-panel">
+          <div class="toolbar">
+            <h2>ペア設定</h2>
+          </div>
+          <div class="participant-grid" id="participantSelectors"></div>
+        </div>
+
+        <div class="board-shell">
+          <div class="toolbar">
+            <h2 id="boardTitle">入力</h2>
+            <div class="toolbar-actions">
+              <button class="text-button plain" id="exportCsvButton" type="button">CSV</button>
+              <button class="text-button plain" id="exportJsonButton" type="button">保存</button>
+              <button class="text-button plain" id="importJsonButton" type="button">読込</button>
+              <input class="hidden-file" id="importFile" type="file" accept="application/json">
+            </div>
+          </div>
+          <div class="scroll-x" id="recordBoard"></div>
+        </div>
+
+        <div class="recent-layout">
+          <div class="table-shell">
+            <div class="toolbar">
+              <h2>最近の記録</h2>
+            </div>
+            <div class="scroll-x" id="recentRecords"></div>
+          </div>
+          <div class="table-shell">
+            <div class="toolbar">
+              <h2>プレーヤー別</h2>
+            </div>
+            <div id="playerTotals"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-stats">
+        <h2 class="summary-title">統計</h2>
+        <div class="chart-shell stats-filter">
+          <div class="toolbar">
+            <h2>表示対象</h2>
+            <div class="toolbar-actions">
+              <select id="statsScopeSelect" aria-label="統計の表示対象"></select>
+            </div>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="chart-shell wide" id="statsPlayerTrends"></div>
+          <div class="chart-shell wide" id="statsPlayerBreakdown"></div>
+          <div class="chart-shell" id="statsPlayTrends"></div>
+          <div class="chart-shell wide" id="statsMatchScores"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-settings">
+        <div class="settings-grid">
+          <div class="settings-block">
+            <div class="settings-head">
+              <h2>プレーヤー</h2>
+            </div>
+            <div class="settings-body" id="playerSettings"></div>
+          </div>
+          <div class="settings-block">
+            <div class="settings-head">
+              <h2>プレー種類</h2>
+            </div>
+            <div class="settings-body">
+              <div class="play-list" id="playList"></div>
+            </div>
+          </div>
+          <div class="settings-block">
+            <div class="settings-head">
+              <h2>試合データ</h2>
+            </div>
+            <div class="settings-body">
+              <button class="text-button danger" id="clearAllMatchesButton" type="button">全試合クリア</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="matchDialog">
+    <form class="dialog-content" id="matchForm">
+      <h2>試合を追加</h2>
+      <div class="field">
+        <label for="matchNameInput">試合名</label>
+        <input id="matchNameInput" type="text" autocomplete="off">
+      </div>
+      <div class="dialog-actions">
+        <button class="text-button plain" id="cancelMatchButton" type="button">キャンセル</button>
+        <button class="text-button primary" id="saveMatchButton" type="submit">追加</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="editDialog">
+    <form class="dialog-content" id="editForm">
+      <h2>記録を修正</h2>
+      <input id="editRecordId" type="hidden">
+      <div class="field">
+        <label for="editPlayer">プレーヤー</label>
+        <select id="editPlayer"></select>
+      </div>
+      <div class="field">
+        <label for="editPlay">プレー</label>
+        <select id="editPlay"></select>
+      </div>
+      <div class="field" id="editCourseField" hidden>
+        <label for="editCourse">理由</label>
+        <select id="editCourse"></select>
+      </div>
+      <div class="field">
+        <label for="editResult">結果</label>
+        <select id="editResult">
+          <option value="得点">得点</option>
+          <option value="失点">失点</option>
+        </select>
+      </div>
+      <div class="dialog-actions">
+        <button class="text-button plain" id="cancelEditButton" type="button">キャンセル</button>
+        <button class="text-button primary" id="saveEditButton" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const INITIAL_VIEW = new URLSearchParams(window.location.search).get('tab') || 'record';
+    const STORAGE_KEY = 'badminton-scorebook-html-v1';
+    const MATCH_PLAYER_SLOTS = 4;
+    const DEFAULT_PLAYERS = ['プレーヤー1', 'プレーヤー2', 'プレーヤー3', 'プレーヤー4'];
+    const DEFAULT_PLAYS = [
+      'ストレートスマッシュ',
+      'クロススマッシュ',
+      'ドロップ',
+      'クロスドロップ',
+      'ドライブ',
+      'ロブ',
+      'クリア',
+      'レシーブ',
+      'SRレシーブ',
+      'SRプッシュ',
+      'SRヘアピン',
+      'プッシュ',
+      'ハーフ',
+      'ショートサーブ',
+      'ロングサーブ',
+      'ヘアピン',
+      'クロスヘアピン',
+      'その他',
+    ];
+    const RESULT_LABELS = ['得点', '失点'];
+    const PLAY_RESULT_RULES = {};
+    const INPUT_MAJOR_PLAYS = DEFAULT_PLAYS.slice();
+    const POINT_SMALL_OPTIONS = ['コース', '角度', 'クロス', 'ライン際', 'ネットぎりぎり', '配球'];
+    const LOST_SMALL_OPTIONS = ['浮いた', 'アウト', 'ネット', '浅い', '当て損ない', 'ジャッジミス', 'ロングサーブ対応'];
+    const DEPRECATED_PLAYS = new Set([
+      'スマッシュコース',
+      'スマッシュ角度',
+      'スマッシュ浮く',
+      'スマッシュアウト',
+      'スマッシュネット',
+      'スマッシュその他ミス',
+      'レシーブ構え',
+      'レシーブネット',
+      'レシーブアウト',
+      'レシーブ甘い',
+      'SR浅い',
+      'ロングサーブ対応',
+      'ジャッジミス',
+    ]);
+    const LEGACY_COURSE_PLAYS = new Set([
+      'スマッシュコース',
+      'スマッシュ角度',
+      'スマッシュ浮く',
+      'スマッシュアウト',
+      'スマッシュネット',
+      'スマッシュその他ミス',
+    ]);
+    const LEGACY_COURSE_OPTIONS = [
+      { value: 'ストレート', label: 'スト' },
+      { value: 'クロス', label: 'クロ' },
+    ];
+    const BASE_INPUT_TREE = buildBaseInputTree();
+
+    const inputState = {
+      player: '',
+      major: '',
+      middle: '',
+      small: '',
+    };
+
+    const state = loadState();
+
+    const els = {
+      matchSelect: document.getElementById('matchSelect'),
+      addMatchButton: document.getElementById('addMatchButton'),
+      currentMetrics: document.getElementById('currentMetrics'),
+      participantSelectors: document.getElementById('participantSelectors'),
+      boardTitle: document.getElementById('boardTitle'),
+      recordBoard: document.getElementById('recordBoard'),
+      recentRecords: document.getElementById('recentRecords'),
+      playerTotals: document.getElementById('playerTotals'),
+      statsScopeSelect: document.getElementById('statsScopeSelect'),
+      statsPlayTrends: document.getElementById('statsPlayTrends'),
+      statsPlayerTrends: document.getElementById('statsPlayerTrends'),
+      statsPlayerBreakdown: document.getElementById('statsPlayerBreakdown'),
+      statsMatchScores: document.getElementById('statsMatchScores'),
+      playerSettings: document.getElementById('playerSettings'),
+      playList: document.getElementById('playList'),
+      clearAllMatchesButton: document.getElementById('clearAllMatchesButton'),
+      exportCsvButton: document.getElementById('exportCsvButton'),
+      exportJsonButton: document.getElementById('exportJsonButton'),
+      importJsonButton: document.getElementById('importJsonButton'),
+      importFile: document.getElementById('importFile'),
+      matchDialog: document.getElementById('matchDialog'),
+      matchForm: document.getElementById('matchForm'),
+      matchNameInput: document.getElementById('matchNameInput'),
+      cancelMatchButton: document.getElementById('cancelMatchButton'),
+      saveMatchButton: document.getElementById('saveMatchButton'),
+      editDialog: document.getElementById('editDialog'),
+      editForm: document.getElementById('editForm'),
+      editRecordId: document.getElementById('editRecordId'),
+      editPlayer: document.getElementById('editPlayer'),
+      editPlay: document.getElementById('editPlay'),
+      editCourseField: document.getElementById('editCourseField'),
+      editCourse: document.getElementById('editCourse'),
+      editResult: document.getElementById('editResult'),
+      cancelEditButton: document.getElementById('cancelEditButton'),
+      saveEditButton: document.getElementById('saveEditButton'),
+    };
+
+    init();
+
+    function init() {
+      bindEvents();
+      renderAll();
+      switchView(['record', 'stats', 'settings'].includes(INITIAL_VIEW) ? INITIAL_VIEW : 'record');
+    }
+
+    function loadState() {
+      const fallback = createInitialState();
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        const players = normalizeList(parsed.players, DEFAULT_PLAYERS);
+        const plays = ensureDefaultPlays(normalizeList(parsed.plays, DEFAULT_PLAYS));
+        const matches = Array.isArray(parsed.matches) && parsed.matches.length > 0
+          ? parsed.matches.map((match, index) => normalizeMatch(match, players, index))
+          : fallback.matches;
+        const activeMatchId = matches.some((match) => match.id === parsed.activeMatchId)
+          ? parsed.activeMatchId
+          : matches[0].id;
+        return {
+          players,
+          plays,
+          matches,
+          activeMatchId,
+          records: normalizeRecords(parsed.records),
+        };
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function createInitialState() {
+      const match = {
+        id: makeId('M'),
+        name: '第1試合',
+        date: toDateInputValue(new Date()),
+        players: getDefaultMatchPlayers(DEFAULT_PLAYERS),
+      };
+      return {
+        players: DEFAULT_PLAYERS.slice(),
+        plays: DEFAULT_PLAYS.slice(),
+        matches: [match],
+        activeMatchId: match.id,
+        records: [],
+      };
+    }
+
+    function normalizeList(value, fallback) {
+      const list = Array.isArray(value)
+        ? value.map((item) => String(item).trim()).filter(Boolean)
+        : [];
+      return list.length > 0 ? list : fallback.slice();
+    }
+
+    function ensureDefaultPlays(plays) {
+      const existing = new Set(plays.map(normalizePlayName));
+      const customPlays = Array.from(existing).filter((play) => !DEFAULT_PLAYS.includes(play) && !DEPRECATED_PLAYS.has(play));
+      return DEFAULT_PLAYS.concat(customPlays);
+    }
+
+    function normalizePlayName(play) {
+      return play === 'レシーブ構え' ? 'レシーブ' : play;
+    }
+
+    function normalizeRecordClassification(record) {
+      const result = RESULT_LABELS.includes(record.result) ? record.result : '得点';
+      const originalPlay = String(record.play || '').trim();
+      const originalCourse = String(record.course || '').trim();
+      let play = normalizePlayName(originalPlay);
+      let course = originalCourse;
+
+      if (originalPlay === 'レシーブ構え') {
+        play = 'レシーブ';
+        course = result === '得点' ? '配球' : '浅い';
+      }
+      if (originalPlay === 'レシーブネット') {
+        play = 'レシーブ';
+        course = 'ネット';
+      }
+      if (originalPlay === 'レシーブアウト') {
+        play = 'レシーブ';
+        course = 'アウト';
+      }
+      if (originalPlay === 'レシーブ甘い') {
+        play = 'レシーブ';
+        course = '浅い';
+      }
+      if (originalPlay === 'SR浅い') {
+        play = 'SRレシーブ';
+        course = '浅い';
+      }
+      if (originalPlay === 'ロングサーブ対応') {
+        play = 'ロングサーブ';
+        course = 'ロングサーブ対応';
+      }
+      if (originalPlay === 'ジャッジミス') {
+        play = 'その他';
+        course = 'ジャッジミス';
+      }
+      if (LEGACY_COURSE_PLAYS.has(originalPlay)) {
+        play = originalCourse === 'クロス' ? 'クロススマッシュ' : 'ストレートスマッシュ';
+        const legacySmall = {
+          'スマッシュコース': 'コース',
+          'スマッシュ角度': '角度',
+          'スマッシュ浮く': '浮いた',
+          'スマッシュアウト': 'アウト',
+          'スマッシュネット': 'ネット',
+          'スマッシュその他ミス': 'ジャッジミス',
+        };
+        course = legacySmall[originalPlay] || '';
+      }
+
+      return {
+        ...record,
+        play,
+        result,
+        course: normalizeCourseName(play, course, result),
+      };
+    }
+
+    function normalizeRecords(records) {
+      return Array.isArray(records)
+        ? records.map(normalizeRecordClassification)
+        : [];
+    }
+
+    function normalizeMatch(match, players, index) {
+      return {
+        id: match && match.id ? String(match.id) : makeId('M'),
+        name: match && match.name ? String(match.name) : `第${index + 1}試合`,
+        date: match && match.date ? String(match.date) : toDateInputValue(new Date()),
+        players: normalizeMatchPlayers(match ? match.players : [], players),
+      };
+    }
+
+    function normalizeMatchPlayers(value, players, fillDefaults = true) {
+      const selected = Array.isArray(value)
+        ? value.map((item) => String(item).trim())
+        : [];
+      const used = new Set();
+      const result = [];
+      for (let index = 0; index < MATCH_PLAYER_SLOTS; index += 1) {
+        const candidate = selected[index];
+        if (players.includes(candidate) && !used.has(candidate)) {
+          result.push(candidate);
+          used.add(candidate);
+          continue;
+        }
+        if (fillDefaults) {
+          const fallback = players.find((player) => !used.has(player)) || '';
+          result.push(fallback);
+          if (fallback) used.add(fallback);
+        } else {
+          result.push('');
+        }
+      }
+      return result;
+    }
+
+    function getDefaultMatchPlayers(players) {
+      const result = [];
+      for (let index = 0; index < MATCH_PLAYER_SLOTS; index += 1) {
+        result.push(players[index] || '');
+      }
+      return result;
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function buildBaseInputTree() {
+      return INPUT_MAJOR_PLAYS.map((play) => ({ label: play }));
+    }
+
+    function smallOptionsForResult(result) {
+      return result === '得点' ? POINT_SMALL_OPTIONS : LOST_SMALL_OPTIONS;
+    }
+
+    function bindEvents() {
+      els.matchSelect.addEventListener('change', () => {
+        state.activeMatchId = els.matchSelect.value;
+        saveState();
+        renderAll();
+      });
+
+      els.addMatchButton.addEventListener('click', () => {
+        const nextNumber = state.matches.length + 1;
+        els.matchNameInput.value = `第${nextNumber}試合`;
+        els.matchDialog.showModal();
+        els.matchNameInput.focus();
+        els.matchNameInput.select();
+      });
+
+      els.matchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        addMatch();
+      });
+      els.cancelMatchButton.addEventListener('click', () => els.matchDialog.close());
+
+      document.querySelectorAll('.tab').forEach((tab) => {
+        tab.addEventListener('click', () => switchView(tab.dataset.view));
+      });
+
+      els.recordBoard.addEventListener('click', (event) => {
+        const selector = event.target.closest('[data-input-level]');
+        if (selector) {
+          updateInputSelection(selector.dataset.inputLevel, selector.dataset.value);
+          return;
+        }
+        const button = event.target.closest('[data-record-action]');
+        if (!button) return;
+        addRecord(button.dataset.player, button.dataset.play, button.dataset.result, button.dataset.course || '');
+      });
+      els.participantSelectors.addEventListener('change', (event) => {
+        const select = event.target.closest('[data-participant-slot]');
+        if (!select) return;
+        updateParticipant(Number(select.dataset.participantSlot), select.value);
+      });
+      els.statsScopeSelect.addEventListener('change', renderStatistics);
+
+      els.recentRecords.addEventListener('click', handleRecordAction);
+      els.clearAllMatchesButton.addEventListener('click', clearAllMatches);
+      els.exportCsvButton.addEventListener('click', exportCsv);
+      els.exportJsonButton.addEventListener('click', exportJson);
+      els.importJsonButton.addEventListener('click', () => els.importFile.click());
+      els.importFile.addEventListener('change', importJson);
+      els.editForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        saveEditedRecord();
+      });
+      els.editPlay.addEventListener('change', () => {
+        renderEditResultOptions(els.editPlay.value);
+        renderEditCourseOptions(els.editPlay.value, '', els.editResult.value);
+      });
+      els.editResult.addEventListener('change', () => renderEditCourseOptions(els.editPlay.value, els.editCourse.value, els.editResult.value));
+      els.cancelEditButton.addEventListener('click', () => els.editDialog.close());
+    }
+
+    function switchView(viewName) {
+      document.querySelectorAll('.tab').forEach((tab) => {
+        tab.setAttribute('aria-selected', String(tab.dataset.view === viewName));
+      });
+      document.querySelectorAll('.view').forEach((view) => {
+        view.classList.toggle('active', view.id === `view-${viewName}`);
+      });
+      if (viewName === 'stats') {
+        renderStatistics();
+      }
+    }
+
+    function renderAll() {
+      renderMatchSelect();
+      renderRecordView();
+      renderStatsScopeSelect();
+      renderStatistics();
+      renderSettings();
+    }
+
+    function renderMatchSelect() {
+      els.matchSelect.innerHTML = state.matches
+        .map((match) => `<option value="${escapeHtml(match.id)}">${escapeHtml(match.name)}</option>`)
+        .join('');
+      els.matchSelect.value = state.activeMatchId;
+    }
+
+    function renderStatsScopeSelect() {
+      const previous = els.statsScopeSelect.value || 'all';
+      els.statsScopeSelect.innerHTML = [
+        '<option value="all">合計</option>',
+        ...state.matches.map((match) => `<option value="${escapeAttr(match.id)}">${escapeHtml(match.name)}</option>`),
+      ].join('');
+      els.statsScopeSelect.value = previous === 'all' || state.matches.some((match) => match.id === previous)
+        ? previous
+        : 'all';
+    }
+
+    function renderRecordView() {
+      const match = getActiveMatch();
+      const records = getActiveRecords();
+      const stats = buildStats(records);
+      els.boardTitle.textContent = match ? match.name : '入力';
+      renderPairScores(records);
+      renderParticipantSelectors();
+      renderBoard(stats);
+      renderRecentRecords(records);
+      renderPlayerTotals(stats);
+    }
+
+    function renderPairScores(records) {
+      const pairScores = buildPairScores(records);
+      els.currentMetrics.innerHTML = [
+        metricHtml('ペアA', pairScores.a.score, pairScores.a.players.join(' / ')),
+        metricHtml('ペアB', pairScores.b.score, pairScores.b.players.join(' / ')),
+      ].join('');
+    }
+
+    function metricHtml(label, value, members = '') {
+      return `
+        <div class="metric">
+          <div class="metric-label">${escapeHtml(label)}</div>
+          <div class="metric-value number">${value}</div>
+          <div class="metric-members">${escapeHtml(members)}</div>
+        </div>
+      `;
+    }
+
+    function getAllowedResults(play) {
+      return PLAY_RESULT_RULES[play] || RESULT_LABELS;
+    }
+
+    function canRecordResult(play, result) {
+      return getAllowedResults(play).includes(result);
+    }
+
+    function getCourseOptions(play, result = '') {
+      if (INPUT_MAJOR_PLAYS.includes(play)) {
+        const values = result && RESULT_LABELS.includes(result)
+          ? smallOptionsForResult(result)
+          : POINT_SMALL_OPTIONS.concat(LOST_SMALL_OPTIONS);
+        return values.map((value) => ({ value, label: value }));
+      }
+      return LEGACY_COURSE_PLAYS.has(play) ? LEGACY_COURSE_OPTIONS : [];
+    }
+
+    function normalizeCourseName(play, course, result = '') {
+      const options = getCourseOptions(play, result);
+      if (options.length === 0) return '';
+      const value = String(course || '').trim();
+      return options.some((option) => option.value === value) ? value : '';
+    }
+
+    function courseLabel(value) {
+      const option = getCourseOptions('', '').find((item) => item.value === value) || LEGACY_COURSE_OPTIONS.find((item) => item.value === value);
+      return option ? option.label : value;
+    }
+
+    function renderParticipantSelectors() {
+      const match = getActiveMatch();
+      if (!match) {
+        els.participantSelectors.innerHTML = '';
+        return;
+      }
+      match.players = normalizeMatchPlayers(match.players, state.players, false);
+      els.participantSelectors.innerHTML = match.players.map((player, index) => {
+        const selectedPlayers = new Set(match.players.filter(Boolean));
+        const options = [''].concat(state.players).map((candidate) => {
+          const isSelected = candidate === player;
+          const isUsed = candidate && selectedPlayers.has(candidate) && !isSelected;
+          return `<option value="${escapeAttr(candidate)}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${candidate ? escapeHtml(candidate) : '未選択'}</option>`;
+        }).join('');
+        const pairLabel = index < 2 ? `ペアA ${index + 1}` : `ペアB ${index - 1}`;
+        return `
+          <div class="field">
+            <label for="participant-${index}">${pairLabel}</label>
+            <select id="participant-${index}" data-participant-slot="${index}">
+              ${options}
+            </select>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderBoard() {
+      const activePlayers = getActivePlayers();
+      if (activePlayers.length === 0) {
+        els.recordBoard.innerHTML = '<div class="empty">プレーヤー未選択</div>';
+        return;
+      }
+      if (!activePlayers.includes(inputState.player)) {
+        inputState.player = '';
+      }
+
+      const tree = getInputTree();
+      const major = tree.find((item) => item.label === inputState.major);
+      if (!major) {
+        inputState.major = '';
+        inputState.middle = '';
+        inputState.small = '';
+      }
+      const pointOptions = major ? POINT_SMALL_OPTIONS.map((item) => ({ label: item, value: item })) : [];
+      const lostOptions = major ? LOST_SMALL_OPTIONS.map((item) => ({ label: item, value: item })) : [];
+      if (!pointOptions.some((item) => item.value === inputState.middle)) {
+        inputState.middle = '';
+      }
+      if (!lostOptions.some((item) => item.value === inputState.small)) {
+        inputState.small = '';
+      }
+      const leaf = buildSelectedLeaf();
+
+      els.recordBoard.innerHTML = `
+        <div class="input-flow">
+          ${selectorColumnHtml('プレーヤー', 'player', activePlayers.map((player) => ({ label: player, value: player })), inputState.player)}
+          ${selectorColumnHtml('種別', 'major', tree.map((item) => ({ label: item.label, value: item.label })), inputState.major)}
+          ${selectorColumnHtml('得点理由', 'middle', pointOptions, inputState.middle)}
+          ${selectorColumnHtml('失点理由', 'small', lostOptions, inputState.small)}
+          ${resultColumnHtml(leaf)}
+        </div>
+      `;
+    }
+
+    function buildSelectedLeaf() {
+      if (!inputState.major) return null;
+      if (inputState.middle) {
+        return {
+          label: inputState.middle,
+          play: inputState.major,
+          result: '得点',
+          course: inputState.middle,
+        };
+      }
+      if (inputState.small) {
+        return {
+          label: inputState.small,
+          play: inputState.major,
+          result: '失点',
+          course: inputState.small,
+        };
+      }
+      return null;
+    }
+
+    function selectorColumnHtml(title, level, options, selectedValue) {
+      return `
+        <div class="selector-column">
+          <h3>${escapeHtml(title)}</h3>
+          <div class="selector-list level-${escapeAttr(level)}">
+            ${options.length > 0 ? options.map((option) => `
+              <button class="selector-option" type="button" data-input-level="${escapeAttr(level)}" data-value="${escapeAttr(option.value)}" aria-pressed="${String(option.value === selectedValue)}">
+                ${escapeHtml(option.label)}
+              </button>
+            `).join('') : '<div class="selection-chip">未選択</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function resultColumnHtml(leaf) {
+      const selectedLeaf = leaf && inputState.player ? leaf : null;
+      return `
+        <div class="selector-column">
+          <h3>結果</h3>
+          <div class="result-actions">
+            ${selectedLeaf ? resultButtonsHtml(selectedLeaf) : '<div class="selection-chip">未選択</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function resultButtonsHtml(leaf) {
+      const allowedResults = leaf.result ? [leaf.result] : getAllowedResults(leaf.play);
+      return allowedResults.map((result) => {
+        const kind = result === '得点' ? 'plus' : 'minus';
+        const symbol = result === '得点' ? '+' : '-';
+        const courseAttr = leaf.course ? ` data-course="${escapeAttr(leaf.course)}"` : '';
+        return `
+          <button class="result-button ${kind}" type="button" data-record-action="add" data-player="${escapeAttr(inputState.player)}" data-play="${escapeAttr(leaf.play)}" data-result="${escapeAttr(result)}"${courseAttr}>
+            ${symbol}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function updateInputSelection(level, value) {
+      if (level === 'player') {
+        inputState.player = value;
+      }
+      if (level === 'major') {
+        inputState.major = value;
+        inputState.middle = '';
+        inputState.small = '';
+      }
+      if (level === 'middle') {
+        inputState.middle = value;
+        inputState.small = '';
+      }
+      if (level === 'small') {
+        inputState.small = value;
+        inputState.middle = '';
+      }
+      renderBoard();
+    }
+
+    function clearClassificationSelection() {
+      inputState.major = '';
+      inputState.middle = '';
+      inputState.small = '';
+    }
+
+    function getInputTree() {
+      return BASE_INPUT_TREE;
+    }
+
+    function renderRecentRecords(records) {
+      const recent = records.slice(-10).reverse();
+      if (recent.length === 0) {
+        els.recentRecords.innerHTML = '<div class="empty">記録なし</div>';
+        return;
+      }
+
+      els.recentRecords.innerHTML = `
+        <table class="recent-table">
+          <thead>
+            <tr>
+              <th>操作</th>
+              <th>時刻</th>
+              <th>プレーヤー</th>
+              <th>プレー</th>
+              <th>結果</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${recent.map((record) => {
+              const normalized = normalizeRecordClassification(record);
+              const hasSmallClassification = Boolean(normalized.course);
+              const canFlip = getAllowedResults(normalized.play).length > 1 && !hasSmallClassification;
+              return `
+                <tr>
+                  <td>
+                    <div class="record-actions">
+                      <button class="mini-button flip" type="button" data-action="flip" data-id="${escapeAttr(record.id)}" ${canFlip ? '' : 'disabled'}>反転</button>
+                      <button class="mini-button plain" type="button" data-action="edit" data-id="${escapeAttr(record.id)}">修正</button>
+                      <button class="mini-button delete" type="button" data-action="delete" data-id="${escapeAttr(record.id)}">削除</button>
+                    </div>
+                  </td>
+                  <td>${escapeHtml(formatTime(record.timestamp))}</td>
+                  <td>${escapeHtml(normalized.player)}</td>
+                  <td>${escapeHtml(formatRecordPlay(normalized))}</td>
+                  <td>${escapeHtml(normalized.result)}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function formatRecordPlay(record) {
+      const play = normalizePlayName(record.play);
+      const course = normalizeCourseName(play, record.course, record.result);
+      return course ? `${play} / ${course}` : play;
+    }
+
+    function renderPlayerTotals(stats) {
+      const players = getActivePlayers();
+      if (players.length === 0) {
+        els.playerTotals.innerHTML = '<div class="empty">プレーヤー未選択</div>';
+        return;
+      }
+
+      const rows = players.map((player) => {
+        const entry = stats.byPlayer.get(player) || emptyStats();
+        return `
+          <tr>
+            <td class="player-name">${escapeHtml(player)}</td>
+            <td class="number">${entry.point}</td>
+            <td class="number">${entry.lost}</td>
+          </tr>
+        `;
+      }).join('');
+      els.playerTotals.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>名前</th>
+              <th>得点</th>
+              <th>失点</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function renderStatistics() {
+      const scope = getStatsScope();
+      const stats = buildStats(scope.records);
+      renderStatsPlayerComparison(scope, stats);
+      renderStatsPlayerBreakdown(scope, stats);
+      renderStatsPlayTrends(scope, stats);
+      renderStatsMatchScores(scope);
+    }
+
+    function getStatsScope() {
+      const selected = els.statsScopeSelect.value || 'all';
+      const match = state.matches.find((item) => item.id === selected);
+      const records = match
+        ? state.records.filter((record) => record.matchId === match.id)
+        : state.records;
+      return {
+        id: match ? match.id : 'all',
+        label: match ? match.name : '合計',
+        match,
+        records,
+        players: getPlayersForStatsScope(match, records),
+      };
+    }
+
+    function getPlayersForStatsScope(match, records) {
+      const players = [];
+      const seen = new Set();
+      const add = (player) => {
+        if (!player || seen.has(player)) return;
+        players.push(player);
+        seen.add(player);
+      };
+
+      if (match) {
+        normalizeMatchPlayers(match.players, state.players, false).forEach(add);
+      } else {
+        state.players.forEach(add);
+      }
+      records.forEach((record) => add(record.player));
+      return players;
+    }
+
+    function renderStatsPlayTrends(scope, stats) {
+      const plays = getStatsPlayOrder(stats);
+      const rows = plays.map((play, index) => {
+        const entry = stats.byPlay.get(play) || emptyStats();
+        return {
+          name: play,
+          point: entry.point,
+          lost: entry.lost,
+          total: entry.point + entry.lost,
+          index,
+        };
+      }).sort((a, b) => (b.total - a.total) || (a.index - b.index));
+
+      renderTrendChart(els.statsPlayTrends, '種別全体 得点/失点', rows, formatPlayLabel);
+    }
+
+    function getStatsPlayOrder(stats) {
+      const known = new Set(DEFAULT_PLAYS);
+      const extra = Array.from(stats.byPlay.keys())
+        .filter((play) => !known.has(play) && !DEPRECATED_PLAYS.has(play));
+      return DEFAULT_PLAYS.concat(extra);
+    }
+
+    function renderStatsPlayerComparison(scope, stats) {
+      const rows = scope.players.map((player, index) => {
+        const entry = stats.byPlayer.get(player) || emptyStats();
+        return {
+          name: player,
+          point: entry.point,
+          lost: entry.lost,
+          total: entry.point + entry.lost,
+          index,
+        };
+      }).sort((a, b) => (b.total - a.total) || (b.point - a.point) || (a.index - b.index));
+
+      if (rows.length === 0) {
+        renderEmptyPanel(els.statsPlayerTrends, 'プレーヤー別 得点/失点比較');
+        return;
+      }
+
+      const maxPoint = Math.max(0, ...rows.map((row) => row.point));
+      const maxLost = Math.max(0, ...rows.map((row) => row.lost));
+      const maxValue = Math.max(1, maxPoint, maxLost);
+      const avgTotal = rows.reduce((sum, row) => sum + row.total, 0) / rows.length;
+
+      els.statsPlayerTrends.innerHTML = `
+        <div class="toolbar">
+          <h2>プレーヤー別 得点/失点比較</h2>
+        </div>
+        <div class="chart-body">
+          ${rows.map((row) => `
+            <div class="player-compare-row">
+              <div class="compare-name">
+                <span>${escapeHtml(row.name)}</span>
+                <span class="compare-meta">計 ${row.total} / 得失差 ${row.point - row.lost}</span>
+              </div>
+              <div class="trend-bars">
+                ${trendBarLineHtml('+', row.point, maxValue, 'point')}
+                ${trendBarLineHtml('-', row.lost, maxValue, 'lost')}
+              </div>
+              <div class="insight-badges">
+                ${playerInsightBadgesHtml(row, maxPoint, maxLost, avgTotal)}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderStatsPlayerBreakdown(scope, stats) {
+      if (scope.players.length === 0) {
+        renderEmptyPanel(els.statsPlayerBreakdown, 'プレーヤー別 種別内訳');
+        return;
+      }
+
+      const plays = getStatsPlayOrder(stats);
+      const maxValue = Math.max(
+        1,
+        ...Array.from(stats.byPlayerPlay.values()).map((entry) => Math.max(entry.point, entry.lost)),
+        ...Array.from(stats.byPlayerPlayCourse.values()).map((entry) => Math.max(entry.point, entry.lost))
+      );
+
+      els.statsPlayerBreakdown.innerHTML = `
+        <div class="toolbar">
+          <h2>プレーヤー別 種別内訳</h2>
+        </div>
+        <div class="chart-body">
+          <div class="breakdown-grid">
+            ${scope.players.map((player) => playerBreakdownHtml(player, stats, maxValue, plays)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function playerBreakdownHtml(player, stats, maxValue, plays) {
+      const playerStats = stats.byPlayer.get(player) || emptyStats();
+      const rows = plays.flatMap((play, index) => {
+        const courseOptions = getCourseOptions(play);
+        if (courseOptions.length > 0) {
+          const aggregate = stats.byPlayerPlay.get(statsKey(player, play)) || emptyStats();
+          const courseRows = courseOptions.map((course, courseIndex) => {
+            const entry = stats.byPlayerPlayCourse.get(statsKey(player, play, course.value)) || emptyStats();
+            return {
+              play,
+              labelHtml: `${formatPlayLabel(play)}<br><span class="course-note">${escapeHtml(course.value)}</span>`,
+              point: entry.point,
+              lost: entry.lost,
+              total: entry.point + entry.lost,
+              index: (index * 10) + courseIndex,
+            };
+          });
+          const courseTotals = courseRows.reduce((total, row) => ({
+            point: total.point + row.point,
+            lost: total.lost + row.lost,
+          }), emptyStats());
+          const unclassified = {
+            point: Math.max(0, aggregate.point - courseTotals.point),
+            lost: Math.max(0, aggregate.lost - courseTotals.lost),
+          };
+          if (unclassified.point + unclassified.lost > 0) {
+            courseRows.push({
+              play,
+              labelHtml: `${formatPlayLabel(play)}<br><span class="course-note">未分類</span>`,
+              point: unclassified.point,
+              lost: unclassified.lost,
+              total: unclassified.point + unclassified.lost,
+              index: (index * 10) + courseOptions.length,
+            });
+          }
+          return courseRows;
+        }
+        const entry = stats.byPlayerPlay.get(statsKey(player, play)) || emptyStats();
+        return [{
+          play,
+          labelHtml: formatPlayLabel(play),
+          point: entry.point,
+          lost: entry.lost,
+          total: entry.point + entry.lost,
+          index,
+        }];
+      }).filter((row) => row.total > 0)
+        .sort((a, b) => (b.total - a.total) || (a.index - b.index));
+      const pointRows = breakdownRowsForKind(rows, 'point');
+      const lostRows = breakdownRowsForKind(rows, 'lost');
+
+      return `
+        <div class="breakdown-card">
+          <div class="breakdown-head">
+            <span>${escapeHtml(player)}</span>
+            <span class="breakdown-total">+${playerStats.point} / -${playerStats.lost}</span>
+          </div>
+          <div class="breakdown-sections">
+            ${breakdownSectionHtml('得点', '+', 'point', pointRows, playerStats.point, maxValue)}
+            ${breakdownSectionHtml('失点', '-', 'lost', lostRows, playerStats.lost, maxValue)}
+          </div>
+        </div>
+      `;
+    }
+
+    function breakdownRowsForKind(rows, kind) {
+      return rows
+        .filter((row) => row[kind] > 0)
+        .map((row) => ({ ...row, kind, value: row[kind] }))
+        .sort((a, b) => (b.value - a.value) || (a.index - b.index));
+    }
+
+    function breakdownSectionHtml(title, sign, kind, rows, total, maxValue) {
+      return `
+        <section class="breakdown-section ${kind}">
+          <div class="breakdown-section-title">
+            <span>${title} ${sign}</span>
+            <span>${total}</span>
+          </div>
+          <div class="breakdown-list">
+            ${rows.length > 0 ? rows.map((row) => breakdownResultHtml(row, maxValue)).join('') : `<div class="breakdown-empty">${title}なし</div>`}
+          </div>
+        </section>
+      `;
+    }
+
+    function breakdownResultHtml(row, maxValue) {
+      const label = row.kind === 'point' ? '+' : '-';
+      const width = Math.round((row.value / maxValue) * 100);
+      return `
+        <div class="breakdown-row ${row.kind}">
+          <div class="breakdown-play">${row.labelHtml}</div>
+          <div class="breakdown-value ${row.kind}">
+            <span class="breakdown-sign">${label}</span>
+            <div class="trend-track">
+              <div class="trend-bar ${row.kind}" style="width: ${width}%"></div>
+            </div>
+            <span class="number">${row.value}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function playerInsightBadgesHtml(row, maxPoint, maxLost, avgTotal) {
+      const badges = [];
+      if (row.total === 0) {
+        badges.push({ label: '関与なし', kind: 'quiet' });
+      } else {
+        if (row.point === maxPoint && maxPoint > 0) {
+          badges.push({ label: '得点最多', kind: 'point' });
+        }
+        if (row.lost === maxLost && maxLost > 0) {
+          badges.push({ label: '失点最多', kind: 'lost' });
+        }
+        if (avgTotal > 0 && row.total <= avgTotal * 0.5) {
+          badges.push({ label: '関与少', kind: 'quiet' });
+        }
+        if (row.point - row.lost >= 2) {
+          badges.push({ label: '得点寄り', kind: 'point' });
+        }
+        if (row.lost - row.point >= 2) {
+          badges.push({ label: '失点寄り', kind: 'lost' });
+        }
+      }
+      if (badges.length === 0) {
+        badges.push({ label: '標準', kind: '' });
+      }
+      return badges.map((badge) => `
+        <span class="insight-badge ${badge.kind}">${escapeHtml(badge.label)}</span>
+      `).join('');
+    }
+
+    function renderStatsMatchScores(scope) {
+      if (scope.records.length === 0) {
+        renderEmptyPanel(els.statsMatchScores, scope.match ? '選択試合スコア' : '試合別スコア');
+        return;
+      }
+
+      const recordsByMatch = groupRecordsByMatch(scope.records);
+      const targetMatches = scope.match ? [scope.match] : state.matches;
+      const rows = targetMatches.map((match) => {
+        const records = recordsByMatch.get(match.id) || [];
+        const scores = buildPairScoresForMatch(match, records);
+        return {
+          match,
+          records,
+          scores,
+        };
+      }).filter((row) => row.records.length > 0);
+
+      if (rows.length === 0) {
+        renderEmptyPanel(els.statsMatchScores, scope.match ? '選択試合スコア' : '試合別スコア');
+        return;
+      }
+
+      els.statsMatchScores.innerHTML = `
+        <div class="toolbar">
+          <h2>${scope.match ? '選択試合スコア' : '試合別スコア'}</h2>
+        </div>
+        <div class="chart-body">
+          ${rows.map(({ match, records, scores }) => `
+            <div class="match-score-row">
+              <div class="match-pair">
+                <div class="match-name">${escapeHtml(match.name)} / 記録 ${records.length}</div>
+                <strong>ペアA</strong>
+                <div class="match-members">${escapeHtml(scores.a.players.join(' / ') || '-')}</div>
+              </div>
+              <div class="match-score number">${scores.a.score} - ${scores.b.score}</div>
+              <div class="match-pair right">
+                <div class="match-name">${escapeHtml(formatMatchDate(match.date))}</div>
+                <strong>ペアB</strong>
+                <div class="match-members">${escapeHtml(scores.b.players.join(' / ') || '-')}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderEmptyPanel(target, title) {
+      target.innerHTML = `
+        <div class="toolbar">
+          <h2>${escapeHtml(title)}</h2>
+        </div>
+        <div class="empty">記録なし</div>
+      `;
+    }
+
+    function groupRecordsByMatch(records) {
+      const map = new Map();
+      records.forEach((record) => {
+        if (!map.has(record.matchId)) {
+          map.set(record.matchId, []);
+        }
+        map.get(record.matchId).push(record);
+      });
+      return map;
+    }
+
+    function renderTrendChart(target, title, rows, labelFormatter) {
+      if (rows.length === 0 || rows.every((row) => row.total === 0)) {
+        target.innerHTML = `
+          <div class="toolbar">
+            <h2>${escapeHtml(title)}</h2>
+          </div>
+          <div class="empty">記録なし</div>
+        `;
+        return;
+      }
+
+      const maxValue = Math.max(1, ...rows.map((row) => Math.max(row.point, row.lost)));
+      target.innerHTML = `
+        <div class="toolbar">
+          <h2>${escapeHtml(title)}</h2>
+        </div>
+        <div class="chart-body">
+          ${rows.map((row) => `
+            <div class="trend-row">
+              <div class="trend-name">${labelFormatter(row.name)}</div>
+              <div class="trend-bars">
+                ${trendBarLineHtml('+', row.point, maxValue, 'point')}
+                ${trendBarLineHtml('-', row.lost, maxValue, 'lost')}
+              </div>
+              <div class="trend-total">計 ${row.total}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function trendBarLineHtml(label, value, maxValue, kind) {
+      const width = Math.round((value / maxValue) * 100);
+      return `
+        <div class="trend-bar-line">
+          <span>${label}</span>
+          <div class="trend-track">
+            <div class="trend-bar ${kind}" style="width: ${width}%"></div>
+          </div>
+          <span class="number">${value}</span>
+        </div>
+      `;
+    }
+
+    function renderSettings() {
+      els.playerSettings.innerHTML = `
+        <form class="player-add-form" id="playerAddForm">
+          <input id="newPlayerName" type="text" autocomplete="off" placeholder="プレーヤー名">
+          <button class="text-button primary" type="submit">追加</button>
+        </form>
+        ${state.players.map((player, index) => `
+          <div class="player-edit-row">
+            <input id="player-${index}" type="text" value="${escapeAttr(player)}" data-player-index="${index}" aria-label="名前${index + 1}">
+            <button class="mini-button delete" type="button" data-remove-player="${index}" ${state.players.length <= 1 ? 'disabled' : ''}>削除</button>
+          </div>
+        `).join('')}
+      `;
+      els.playerSettings.querySelector('#playerAddForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        addPlayer(els.playerSettings.querySelector('#newPlayerName').value);
+      });
+      els.playerSettings.querySelectorAll('[data-player-index]').forEach((input) => {
+        input.addEventListener('change', () => {
+          const index = Number(input.dataset.playerIndex);
+          const nextName = input.value.trim();
+          if (!nextName) {
+            input.value = state.players[index];
+            return;
+          }
+          if (state.players.some((player, playerIndex) => player === nextName && playerIndex !== index)) {
+            input.value = state.players[index];
+            return;
+          }
+          const oldName = state.players[index];
+          state.players[index] = nextName;
+          state.matches.forEach((match) => {
+            match.players = normalizeMatchPlayers(
+              (match.players || []).map((player) => (player === oldName ? nextName : player)),
+              state.players,
+              false
+            );
+          });
+          state.records.forEach((record) => {
+            if (record.player === oldName) {
+              record.player = nextName;
+            }
+          });
+          saveState();
+          renderAll();
+        });
+      });
+      els.playerSettings.querySelectorAll('[data-remove-player]').forEach((button) => {
+        button.addEventListener('click', () => removePlayer(Number(button.dataset.removePlayer)));
+      });
+
+      els.playList.innerHTML = state.plays
+        .map((play) => `<div class="play-pill">${escapeHtml(play)}</div>`)
+        .join('');
+    }
+
+    function addMatch() {
+      const name = els.matchNameInput.value.trim() || `第${state.matches.length + 1}試合`;
+      const match = {
+        id: makeId('M'),
+        name,
+        date: toDateInputValue(new Date()),
+        players: getDefaultMatchPlayers(state.players),
+      };
+      state.matches.push(match);
+      state.activeMatchId = match.id;
+      saveState();
+      els.matchDialog.close();
+      renderAll();
+    }
+
+    function clearAllMatches() {
+      const shouldClear = confirm('すべての試合と記録を削除します。この操作は元に戻せません。実行しますか？');
+      if (!shouldClear) return;
+      const match = {
+        id: makeId('M'),
+        name: '第1試合',
+        date: toDateInputValue(new Date()),
+        players: getDefaultMatchPlayers(state.players),
+      };
+      state.matches = [match];
+      state.activeMatchId = match.id;
+      state.records = [];
+      inputState.player = '';
+      clearClassificationSelection();
+      saveState();
+      renderAll();
+    }
+
+    function addPlayer(name) {
+      const player = String(name).trim();
+      if (!player || state.players.includes(player)) return;
+      state.players.push(player);
+      saveState();
+      renderAll();
+    }
+
+    function removePlayer(index) {
+      if (state.players.length <= 1 || index < 0 || index >= state.players.length) return;
+      const removed = state.players.splice(index, 1)[0];
+      state.matches.forEach((match) => {
+        match.players = normalizeMatchPlayers(
+          (match.players || []).map((player) => (player === removed ? '' : player)),
+          state.players,
+          false
+        );
+      });
+      saveState();
+      renderAll();
+    }
+
+    function updateParticipant(slot, player) {
+      const match = getActiveMatch();
+      if (!match || slot < 0 || slot >= MATCH_PLAYER_SLOTS) return;
+      match.players = normalizeMatchPlayers(match.players, state.players, false);
+      match.players[slot] = player;
+      match.players = normalizeMatchPlayers(match.players, state.players, false);
+      saveState();
+      renderRecordView();
+    }
+
+    function addRecord(player, play, result, course = '') {
+      const normalizedPlay = normalizePlayName(play);
+      const normalizedCourse = normalizeCourseName(normalizedPlay, course, result);
+      const needsCourse = getCourseOptions(normalizedPlay, result).length > 0;
+      if (!player || !canRecordResult(normalizedPlay, result) || (needsCourse && !normalizedCourse)) return;
+      const record = {
+        id: makeId('R'),
+        matchId: state.activeMatchId,
+        timestamp: new Date().toISOString(),
+        player,
+        play: normalizedPlay,
+        result,
+        course: normalizedCourse,
+      };
+      state.records.push(record);
+      saveState();
+      clearClassificationSelection();
+      renderAfterRecordChange();
+    }
+
+    function undoLastRecord() {
+      const index = findLastRecordIndexForActiveMatch();
+      if (index < 0) return;
+      state.records.splice(index, 1);
+      saveState();
+      renderAfterRecordChange();
+    }
+
+    function handleRecordAction(event) {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+      const id = button.dataset.id;
+      if (button.dataset.action === 'delete') {
+        deleteRecord(id);
+      }
+      if (button.dataset.action === 'flip') {
+        flipRecord(id);
+      }
+      if (button.dataset.action === 'edit') {
+        openEditDialog(id);
+      }
+    }
+
+    function deleteRecord(id) {
+      const index = state.records.findIndex((record) => record.id === id);
+      if (index < 0) return;
+      state.records.splice(index, 1);
+      saveState();
+      renderAfterRecordChange();
+    }
+
+    function flipRecord(id) {
+      const record = state.records.find((item) => item.id === id);
+      if (!record) return;
+      const normalized = normalizeRecordClassification(record);
+      const allowedResults = getAllowedResults(normalized.play);
+      if (allowedResults.length < 2 || normalized.course) return;
+      const nextResult = normalized.result === '得点' ? '失点' : '得点';
+      if (!allowedResults.includes(nextResult)) return;
+      record.play = normalized.play;
+      record.result = nextResult;
+      record.course = '';
+      saveState();
+      renderAfterRecordChange();
+    }
+
+    function openEditDialog(id) {
+      const record = state.records.find((item) => item.id === id);
+      if (!record) return;
+      const normalized = normalizeRecordClassification(record);
+      record.play = normalized.play;
+      record.result = normalized.result;
+      record.course = normalized.course;
+      els.editRecordId.value = id;
+      els.editPlayer.innerHTML = getKnownPlayers()
+        .map((player) => `<option value="${escapeAttr(player)}">${escapeHtml(player)}</option>`)
+        .join('');
+      els.editPlay.innerHTML = state.plays
+        .map((play) => `<option value="${escapeAttr(play)}">${escapeHtml(play)}</option>`)
+        .join('');
+      els.editPlayer.value = record.player;
+      els.editPlay.value = record.play;
+      renderEditResultOptions(record.play, record.result);
+      renderEditCourseOptions(record.play, record.course, els.editResult.value);
+      els.editDialog.showModal();
+    }
+
+    function renderEditCourseOptions(play, selectedCourse = '', result = '') {
+      const options = getCourseOptions(play, result);
+      els.editCourseField.hidden = options.length === 0;
+      if (options.length === 0) {
+        els.editCourse.innerHTML = '';
+        return;
+      }
+      els.editCourse.innerHTML = options
+        .map((option) => `<option value="${escapeAttr(option.value)}">${escapeHtml(option.value)}</option>`)
+        .join('');
+      els.editCourse.value = normalizeCourseName(play, selectedCourse, result) || options[0].value;
+    }
+
+    function renderEditResultOptions(play, selectedResult = '') {
+      const allowedResults = getAllowedResults(play);
+      els.editResult.innerHTML = allowedResults
+        .map((result) => `<option value="${escapeAttr(result)}">${escapeHtml(result)}</option>`)
+        .join('');
+      els.editResult.value = allowedResults.includes(selectedResult) ? selectedResult : allowedResults[0];
+    }
+
+    function saveEditedRecord() {
+      const record = state.records.find((item) => item.id === els.editRecordId.value);
+      if (!record) return;
+      const play = normalizePlayName(els.editPlay.value);
+      const result = canRecordResult(play, els.editResult.value)
+        ? els.editResult.value
+        : getAllowedResults(play)[0];
+      const course = normalizeCourseName(play, els.editCourse.value, result);
+      record.player = els.editPlayer.value;
+      record.play = play;
+      record.result = result;
+      record.course = course;
+      saveState();
+      els.editDialog.close();
+      renderAfterRecordChange();
+    }
+
+    function renderAfterRecordChange() {
+      renderRecordView();
+      if (document.getElementById('view-stats').classList.contains('active')) {
+        renderStatistics();
+      }
+    }
+
+    function findLastRecordIndexForActiveMatch() {
+      for (let index = state.records.length - 1; index >= 0; index -= 1) {
+        if (state.records[index].matchId === state.activeMatchId) return index;
+      }
+      return -1;
+    }
+
+    function getActiveMatch() {
+      return state.matches.find((match) => match.id === state.activeMatchId) || state.matches[0];
+    }
+
+    function getActivePlayers() {
+      const match = getActiveMatch();
+      if (!match) return [];
+      match.players = normalizeMatchPlayers(match.players, state.players, false);
+      return match.players.filter(Boolean);
+    }
+
+    function getActivePairs() {
+      return getPairsForMatch(getActiveMatch());
+    }
+
+    function getPairsForMatch(match) {
+      if (!match) {
+        return { a: [], b: [] };
+      }
+      const players = normalizeMatchPlayers(match.players, state.players, false);
+      return {
+        a: players.slice(0, 2).filter(Boolean),
+        b: players.slice(2, 4).filter(Boolean),
+      };
+    }
+
+    function buildPairScores(records) {
+      return buildPairScoresForMatch(getActiveMatch(), records);
+    }
+
+    function buildPairScoresForMatch(match, records) {
+      const pairs = getPairsForMatch(match);
+      const pairA = new Set(pairs.a);
+      const pairB = new Set(pairs.b);
+      const scores = {
+        a: { score: 0, players: pairs.a },
+        b: { score: 0, players: pairs.b },
+      };
+
+      records.forEach((record) => {
+        const isPairA = pairA.has(record.player);
+        const isPairB = pairB.has(record.player);
+        if (!isPairA && !isPairB) return;
+
+        if ((isPairA && record.result === '得点') || (isPairB && record.result === '失点')) {
+          scores.a.score += 1;
+        }
+        if ((isPairB && record.result === '得点') || (isPairA && record.result === '失点')) {
+          scores.b.score += 1;
+        }
+      });
+
+      return scores;
+    }
+
+    function getKnownPlayers() {
+      const players = new Set(state.players);
+      state.records.forEach((record) => {
+        if (record.player) players.add(record.player);
+      });
+      return Array.from(players);
+    }
+
+    function getActiveRecords() {
+      return state.records.filter((record) => record.matchId === state.activeMatchId);
+    }
+
+    function buildStats(records) {
+      const stats = {
+        total: emptyStats(),
+        byPlayer: new Map(),
+        byPlay: new Map(),
+        byPlayerPlay: new Map(),
+        byPlayerPlayCourse: new Map(),
+      };
+      records.forEach((record) => {
+        const normalized = normalizeRecordClassification(record);
+        const point = normalized.result === '得点' ? 1 : 0;
+        const lost = normalized.result === '失点' ? 1 : 0;
+        const delta = { point, lost };
+        addStats(stats.total, delta);
+        addStats(getStats(stats.byPlayer, normalized.player), delta);
+        addStats(getStats(stats.byPlay, normalized.play), delta);
+        addStats(getStats(stats.byPlayerPlay, statsKey(normalized.player, normalized.play)), delta);
+        if (normalized.course) {
+          addStats(getStats(stats.byPlayerPlayCourse, statsKey(normalized.player, normalized.play, normalized.course)), delta);
+        }
+      });
+      return stats;
+    }
+
+    function emptyStats() {
+      return { point: 0, lost: 0 };
+    }
+
+    function getStats(map, key) {
+      if (!map.has(key)) map.set(key, emptyStats());
+      return map.get(key);
+    }
+
+    function addStats(target, delta) {
+      target.point += delta.point;
+      target.lost += delta.lost;
+    }
+
+    function statsKey(player, play, course = '') {
+      return `${player}\u0001${play}\u0001${course}`;
+    }
+
+    function formatPlayLabel(play) {
+      const wrapped = {
+        'ストレートスマッシュ': ['ストレート', 'スマッシュ'],
+        'クロススマッシュ': ['クロス', 'スマッシュ'],
+        'スマッシュコース': ['スマッシュ', 'コース'],
+        'スマッシュ角度': ['スマッシュ', '角度'],
+        'スマッシュ浮く': ['スマッシュ', '浮く'],
+        'スマッシュアウト': ['スマッシュ', 'アウト'],
+        'スマッシュネット': ['スマッシュ', 'ネット'],
+        'スマッシュその他ミス': ['スマッシュ', 'その他ミス'],
+        'クロスヘアピン': ['クロス', 'ヘアピン'],
+        'ショートサーブ': ['ショート', 'サーブ'],
+        'ロングサーブ': ['ロング', 'サーブ'],
+        'ロングサーブ対応': ['ロングサーブ', '対応'],
+        'クロスドロップ': ['クロス', 'ドロップ'],
+        'SRレシーブ': ['SR', 'レシーブ'],
+        'レシーブネット': ['レシーブ', 'ネット'],
+        'レシーブアウト': ['レシーブ', 'アウト'],
+        'レシーブ甘い': ['レシーブ', '甘い'],
+        'SRプッシュ': ['SR', 'プッシュ'],
+        'SRヘアピン': ['SR', 'ヘアピン'],
+        'SR浅い': ['SR', '浅い'],
+        'ジャッジミス': ['ジャッジ', 'ミス'],
+      };
+      if (!wrapped[play]) return escapeHtml(play);
+      return wrapped[play].map(escapeHtml).join('<br>');
+    }
+
+    function exportCsv() {
+      const header = ['試合', '時刻', 'プレーヤー', 'プレー', 'コース', '結果', '得点', '失点'];
+      const rows = state.records.map((record) => {
+        const match = state.matches.find((item) => item.id === record.matchId);
+        const normalized = normalizeRecordClassification(record);
+        const point = normalized.result === '得点' ? 1 : 0;
+        const lost = normalized.result === '失点' ? 1 : 0;
+        return [
+          match ? match.name : record.matchId,
+          formatDateTime(record.timestamp),
+          normalized.player,
+          normalized.play,
+          normalized.course,
+          normalized.result,
+          point,
+          lost,
+        ];
+      });
+      const csv = [header].concat(rows)
+        .map((row) => row.map(csvCell).join(','))
+        .join('\n');
+      downloadFile(`badminton-records-${toDateInputValue(new Date())}.csv`, csv, 'text/csv;charset=utf-8');
+    }
+
+    function exportJson() {
+      downloadFile(`badminton-scorebook-${toDateInputValue(new Date())}.json`, JSON.stringify(state, null, 2), 'application/json');
+    }
+
+    function importJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(String(reader.result));
+          state.players = normalizeList(imported.players, DEFAULT_PLAYERS);
+          state.plays = ensureDefaultPlays(normalizeList(imported.plays, DEFAULT_PLAYS));
+          state.matches = Array.isArray(imported.matches) && imported.matches.length > 0
+            ? imported.matches.map((match, index) => normalizeMatch(match, state.players, index))
+            : createInitialState().matches;
+          state.activeMatchId = state.matches.some((match) => match.id === imported.activeMatchId)
+            ? imported.activeMatchId
+            : state.matches[0].id;
+          state.records = normalizeRecords(imported.records);
+          saveState();
+          renderAll();
+        } catch (error) {
+          alert('JSONを読み込めませんでした。');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvCell(value) {
+      return `"${String(value).replace(/"/g, '""')}"`;
+    }
+
+    function makeId(prefix) {
+      if (window.crypto && crypto.randomUUID) {
+        return `${prefix}-${crypto.randomUUID()}`;
+      }
+      return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function formatTime(value) {
+      return new Intl.DateTimeFormat('ja-JP', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }).format(new Date(value));
+    }
+
+    function formatDateTime(value) {
+      return new Intl.DateTimeFormat('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }).format(new Date(value));
+    }
+
+    function formatMatchDate(value) {
+      if (!value) return '-';
+      return new Intl.DateTimeFormat('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(`${value}T00:00:00`));
+    }
+
+    function toDateInputValue(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value);
+    }
+  </script>
+</body>
+</html>
