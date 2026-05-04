@@ -15,6 +15,7 @@ from linebot.models import (
 from common.consts import SHOW_EVENTS, SHOW_MEMBERS, SHOW_NEXT_EVENT, SHOW_VIDEOS
 from common.get_logger import get_logger
 from common.line_bot_client import get_line_bot_client
+from common.scorebook_links import scorebook_target_url
 from services.ngrok_service import current_ngrok_public_url
 
 load_dotenv()
@@ -98,7 +99,7 @@ def create_rich_menu():
                     height=AKIO_HEIGHT_TOP,
                 ),
                 action=URIAction(
-                    uri=f"{base_url}/badminton-scorebook?tab=record",
+                    uri=scorebook_target_url(base_url, tab="record"),
                     label="scorebook record",
                 ),
             ),
@@ -110,7 +111,7 @@ def create_rich_menu():
                     height=AKIO_HEIGHT_TOP,
                 ),
                 action=URIAction(
-                    uri=f"{base_url}/badminton-scorebook?tab=stats",
+                    uri=scorebook_target_url(base_url, tab="stats"),
                     label="scorebook stats",
                 ),
             ),
@@ -122,7 +123,7 @@ def create_rich_menu():
                     height=AKIO_HEIGHT_BOTTOM,
                 ),
                 action=URIAction(
-                    uri=f"{base_url}/badminton-scorebook?tab=settings",
+                    uri=scorebook_target_url(base_url, tab="settings"),
                     label="scorebook settings",
                 ),
             ),

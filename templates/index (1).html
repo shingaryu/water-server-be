@@ -94,6 +94,26 @@
       font-weight: 800;
     }
 
+    .title-stack {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .context-badge {
+      width: fit-content;
+      max-width: 100%;
+      padding: 4px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.14);
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
     .match-controls {
       display: flex;
       gap: 8px;
@@ -1124,7 +1144,10 @@
   <div class="app">
     <header class="topbar">
       <div class="topbar-inner">
-        <h1>バドミントンダブルス記録</h1>
+        <div class="title-stack">
+          <h1>バドミントンダブルス記録</h1>
+          <div class="context-badge" id="scorebookGroupBadge" hidden></div>
+        </div>
         <div class="match-controls">
           <div class="field">
             <label for="matchSelect">試合</label>
@@ -1274,8 +1297,12 @@
   </dialog>
 
   <script>
-    const INITIAL_VIEW = new URLSearchParams(window.location.search).get('tab') || 'record';
-    const STORAGE_KEY = 'badminton-scorebook-html-v1';
+    const queryParams = new URLSearchParams(window.location.search);
+    const INITIAL_VIEW = queryParams.get('tab') || 'record';
+    const STORAGE_KEY_BASE = 'badminton-scorebook-html-v1';
+    const REQUESTED_GROUP_NAME = normalizeGroupName(queryParams.get('group') || queryParams.get('workspace') || '');
+    const STORAGE_SCOPE = REQUESTED_GROUP_NAME ? slugifyStorageScope(REQUESTED_GROUP_NAME) : '';
+    const STORAGE_KEY = STORAGE_SCOPE ? `${STORAGE_KEY_BASE}::${STORAGE_SCOPE}` : STORAGE_KEY_BASE;
     const MATCH_PLAYER_SLOTS = 4;
     const DEFAULT_PLAYERS = ['プレーヤー1', 'プレーヤー2', 'プレーヤー3', 'プレーヤー4'];
     const DEFAULT_PLAYS = [
@@ -1342,6 +1369,7 @@
     const state = loadState();
 
     const els = {
+      scorebookGroupBadge: document.getElementById('scorebookGroupBadge'),
       matchSelect: document.getElementById('matchSelect'),
       addMatchButton: document.getElementById('addMatchButton'),
       currentMetrics: document.getElementById('currentMetrics'),
@@ -1383,8 +1411,15 @@
 
     function init() {
       bindEvents();
+      renderContextBadge();
       renderAll();
       switchView(['record', 'stats', 'settings'].includes(INITIAL_VIEW) ? INITIAL_VIEW : 'record');
+    }
+
+    function renderContextBadge() {
+      if (!REQUESTED_GROUP_NAME || !els.scorebookGroupBadge) return;
+      els.scorebookGroupBadge.textContent = REQUESTED_GROUP_NAME;
+      els.scorebookGroupBadge.hidden = false;
     }
 
     function loadState() {
@@ -2733,13 +2768,14 @@
     }
 
     function exportCsv() {
-      const header = ['試合', '時刻', 'プレーヤー', 'プレー', 'コース', '結果', '得点', '失点'];
+      const baseHeader = ['試合', '時刻', 'プレーヤー', 'プレー', 'コース', '結果', '得点', '失点'];
+      const header = REQUESTED_GROUP_NAME ? ['グループ'].concat(baseHeader) : baseHeader;
       const rows = state.records.map((record) => {
         const match = state.matches.find((item) => item.id === record.matchId);
         const normalized = normalizeRecordClassification(record);
         const point = normalized.result === '得点' ? 1 : 0;
         const lost = normalized.result === '失点' ? 1 : 0;
-        return [
+        const row = [
           match ? match.name : record.matchId,
           formatDateTime(record.timestamp),
           normalized.player,
@@ -2749,15 +2785,22 @@
           point,
           lost,
         ];
+        return REQUESTED_GROUP_NAME ? [REQUESTED_GROUP_NAME].concat(row) : row;
       });
       const csv = [header].concat(rows)
         .map((row) => row.map(csvCell).join(','))
         .join('\n');
-      downloadFile(`badminton-records-${toDateInputValue(new Date())}.csv`, csv, 'text/csv;charset=utf-8');
+      downloadFile(`badminton-records-${fileScope()}${toDateInputValue(new Date())}.csv`, csv, 'text/csv;charset=utf-8');
     }
 
     function exportJson() {
-      downloadFile(`badminton-scorebook-${toDateInputValue(new Date())}.json`, JSON.stringify(state, null, 2), 'application/json');
+      const payload = {
+        ...state,
+        scorebookGroup: REQUESTED_GROUP_NAME || undefined,
+        exportType: REQUESTED_GROUP_NAME ? 'scopedScorebook' : undefined,
+        exportedAt: new Date().toISOString(),
+      };
+      downloadFile(`badminton-scorebook-${fileScope()}${toDateInputValue(new Date())}.json`, JSON.stringify(payload, null, 2), 'application/json');
     }
 
     function importJson(event) {
@@ -2843,6 +2886,28 @@
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
+    }
+
+    function normalizeGroupName(value) {
+      return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 80);
+    }
+
+    function slugifyStorageScope(value) {
+      const slug = normalizeGroupName(value)
+        .toLowerCase()
+        .normalize('NFKC')
+        .replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
+      return slug || 'group';
+    }
+
+    function fileScope() {
+      return REQUESTED_GROUP_NAME ? `${safeFilePart(REQUESTED_GROUP_NAME)}-` : '';
+    }
+
+    function safeFilePart(value) {
+      return slugifyStorageScope(value).slice(0, 60) || 'group';
     }
 
     function escapeHtml(value) {
